@@ -4,13 +4,52 @@ index: 1
 category: "releases"
 type: "overview"
 source: "https://github.com/uport-project/uport-project.github.io/blob/develop/markdown/docs/overview/releases.md"
-announcement: "New Major Releases with Breaking Changes!  See https://developer.uport.me/releases for more info."
-announcementType: "negative"
+announcement: "Announcing EIP-712 support! See our mobile and library release notes https://developer.uport.me/overview/releases for details."
+announcementType: "positive"
 ---
 
 # Releases
 
+## Uport Mobile
+
+### What's New in Version 1.5.20 build v403
+
+* Chasqui responses are now encrypted
+* Support to receive and sign ERC-712 typed data requests
+* Simple App branding support
+* Support to receive and sign unstructured data requests
+
 ## Uport Connect
+
+### What's New in Version 1.1.0
+
+### Personal Sign Flow
+The uPort mobile app now supports "personal sign" functionality, and there is a new message to make such a request to a uPort mobile app.  For `uport-connect`, support for this feature includes:
+* New method `Connect.requestPersonalSign(data, id, sendOpts)` which creates and sends a personal sign request message to a mobile app.  Its response may be listened for with `Connect.onResponse` as all other messages.
+* Support for `personal_sign` RPC call (invoked by `web3.personal.sign`, e.g.) in `UportSubprovider`, via the above method on `Connect`
+
+### Typed Data (ERC712) Signature Flow
+The uPort mobile app also supports the new `eth_signTypedData` RPC call defined by the [EIP712 Specification](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md).  Correspondingly, this library now includes:
+* New method `Connect.requestTypeDataSignature(typedData, id, sendOpts)`, which creates and sends a typed data signature request message to a mobile app. Its response may be listened for with `Connect.onResponse` as all other messages.
+* Support for `eth_signTypedData` and `eth_signTypedData_v3` RPC calls in `UportSubprovider`, via the above method on `Connect`
+
+### Simple App Profiles
+
+It's now possible to include a list of JWTs to better identify an application making a request via a new property `vc`.  In particular, a JWT in the form of an "app profile" has semantic meaning to a mobile app, and will be displayed along with the request card. This app profile can contain any subset of the following five fields which are recognized by the uPort Mobile App:
+
+| Key          | Type   | Description |
+|--------------|--------|-------------|
+|`name`        |`String`| Application name|
+|`description` |`String`| Description of application |
+|`url`         |`String`| URL from which application is being served|
+|`profileImage`|IPLD Link| Foreground image to display in requests to mobile app|
+|`bannerImage` |IPLD Link| Background image to display in requests to mobile app |
+
+In particular for `uport-connect`, this message will be set up as follows:
+* A `Connect` instance can be instantiated with a `vc` option, which is a list of JWTs or IPFS hashes (in the form `/ipfs/${hash}`), which will be passed along with every request from that instance.
+* If no `vc` argument is supplied, the first request from the instance will sign and upload to IPFS a JWT identifying the app's name, the URL from which it has been served, and any other supplied keys of the profile claim described above.  This will become the only entry of the `vc` array, and be passed along with every request.
+
+-----------------------------------------------------------------------------
 
 ### What's new in 1.0?
 
@@ -52,8 +91,9 @@ To reduce bundle size for those who do not need it, we no longer bundle `web3` w
 const web3 = new Web3(connect.getProvider())
 ```
 
-### What's New in Version 0.7.8 (minor release)
+-----------------------------------------------------------------------------
 
+### What's New in Version 0.7.8 (minor release)
 
 [uport-connect@0.7.8](https://github.com/uport-project/uport-connect/releases/tag/v0.7.8)
 
@@ -72,6 +112,14 @@ const web3 = new Web3(connect.getProvider())
 * 0.7.5 and later minor versions will remain backwards compatible, working with both current uPort Mobile clients and future releases.
 
 ## Uport Credentials (formerly Uport JS)
+
+### What's new in Version 1.1.0?
+
+* New method `Credentials.createPersonalSignRequest()` for creating a message to request a `personal_sign` RPC call from a uPort mobile wallet
+* New method `Credentials.createTypedDataSignatureRequest()` for creating a message to request a `eth_signTypedData` RPC call from a uPort mobile wallet
+* Support for `vc` property throughout messages, see accompanying notes in `uport-connect@1.1.0`
+
+-----------------------------------------------------------------------------
 
 #### What's new in 1.0?
 
@@ -111,6 +159,7 @@ As the primary method for identity creation and management has changed, we no lo
 #### `credentials.push` -> **removed**
 Push functionality is now handled by the new [`uport-transports`](https://github.com/uport-project/uport-transports) library.  Additionally, when using `uport-connect`, a `Connect` instance will make requests using push automatically if given permission from a mobile app.
 
+-----------------------------------------------------------------------------
 
 ### *What's New in Version uport@0.6.5 (minor release)*
 
