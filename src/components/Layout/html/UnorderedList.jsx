@@ -7,9 +7,9 @@ export default styled.ul`
   padding: 0;
 
   li {
-    display: grid;
-    grid-template-columns: 35px 1fr;
     margin: 0 0 20px;
+    padding-left: 20px;
+    position: relative;
   }
   li::before {
     background-image: url(${tick});
@@ -19,9 +19,10 @@ export default styled.ul`
     content: "";
     color: #62b482;
     height: 20px;
-    position: static;
+    left: -10px;
     text-align: center;
-    vertical-align: middle;
     width: 20px;
+    position:absolute;
+    top: 0;
   }
 `
