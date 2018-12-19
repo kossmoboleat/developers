@@ -18,7 +18,7 @@ npm install --save uport-credentials
 `
 const installCodeClient =
 `npm init
-npm install --save uport-connect@1.1.0-alpha.12
+npm install --save uport-connect
 `
 const initServerCode = (appDetails, appEnvironment, pk) =>
 `import { Credentials } from "uport-credentials"
@@ -43,7 +43,6 @@ const initClientCode = (appDetails, appEnvironment) =>
 
 const uport = new Connect('${appDetails.appName}', {
   network: "${appEnvironment.network}",
-  url: "https://${appDetails.appURL || ''}",
   profileImage: {"/": "/ipfs/${appDetails.ipfsLogoHash || ''}"},
   bannerImage: {"/": "/ipfs/${appDetails.ipfsBgHash || ''}"},
   description: "${appDetails.appDescription || ''}"
