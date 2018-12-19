@@ -3,7 +3,7 @@ import tick from '../../../images/blue-tick.svg'
 
 export default styled.ul`
   list-style: none;
-  margin: 0 0 10px 0;
+  margin: 0 0 10px 10px;
   padding: 0;
 
   li {

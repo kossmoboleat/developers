@@ -485,7 +485,9 @@ ColorPicker.Cover = styled.div`
   top: 0;
 `
 const UploadProgress = styled.div`
+  color: #5C50CA;
   font-weight: 600;
+  max-width: 60%;
   padding: 20px 10px;
   text-align: center;
 `
