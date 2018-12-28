@@ -90,16 +90,16 @@
     "gulp-sym": "1.0.2",
     "gulp-watch": "^5.0.1",
     "ini": "^1.3.5",
-    "jest": "^23.5.0",
+    "jest": "^23.6.0",
     "jest-cli": "^23.6.0",
-    "jest-config": "^23.5.0",
-    "jest-puppeteer": "^3.5.2",
+    "jest-config": "^23.6.0",
+    "jest-puppeteer": "^3.7.0",
     "jsdoc": "3.5.5",
     "minimatch": "^3.0.4",
     "minimist": "^1.2.0",
     "prettier": "^1.14.2",
     "prismjs": "^1.15.0",
-    "puppeteer": "^1.7.0",
+    "puppeteer": "^1.11.0",
     "remark-cli": "^5.0.0",
     "remark-lint-are-links-valid-alive": "^0.3.0",
     "remark-lint-blank-lines-1-0-2": "^2.0.0",
@@ -147,7 +147,8 @@
     "lint:js": "eslint --ext .js,.jsx --ignore-pattern public,static .",
     "lint:md": "remark content/public/",
     "write-good": "write-good $(glob 'content/public/**/*.md')",
-    "format:js": "prettier '**/*.{js,jsx}' --write"
+    "format:js": "prettier '**/*.{js,jsx}' --write",
+    "test": "jest"
   },
   "remarkConfig": {
     "plugins": [

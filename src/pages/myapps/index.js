@@ -48,7 +48,7 @@ class MyApps extends React.Component {
               <div className='Grid-cell myapps-start-left-wrap'>
                 <div className='myapps-start-left'>
                   <Link to='/'>
-                    <Logo src={logo} />
+                    <Logo src={logo} className='brand-img' />
                   </Link>
                   <h1 className='title'>Decentralized Identity for Decentralized Applications</h1>
                   <ul>

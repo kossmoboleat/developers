@@ -111,7 +111,7 @@ class MyAppsConfigurator extends React.Component {
               {this.state.step !== 4
                 ? <span className={`brand w-nav-brand`}>
                     <Link to='/'>
-                      <img src={logo} />
+                      <img src={logo} className='brand-img' />
                     </Link>
                   </span>
                 : null

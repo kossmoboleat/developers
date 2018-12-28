@@ -13,7 +13,7 @@ class MainHeader extends React.Component {
         <Container>
           <NavGrid>
             <Link to='/'>
-              <img src={bannerImg} />
+              <img className='brand-img' src={bannerImg} />
             </Link>
             <div className='nav-wrap'>
               <Navigation
