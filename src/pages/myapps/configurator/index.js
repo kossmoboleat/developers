@@ -145,7 +145,6 @@ class MyAppsConfigurator extends React.Component {
                       appEnvironment={this.state.appEnvironment}
                       getChildState={this.getChildState}
                       saveApps={this.props.saveApps}
-                      setCurrentApp={this.props.setCurrentApp}
                       ipfsProfileHash={this.state.ipfsProfileHash}
                       signingKey={this.state.pk} />
                   default :
@@ -221,8 +220,7 @@ const mapStateToProps = ({ profile }) => {
 const mapDispatchToProps = dispatch => {
   return {
     saveProfile: (profile) => dispatch({ type: `SAVE_PROFILE`, profile: profile }),
-    saveApps: (apps) => dispatch({ type: `SAVE_APPS`, uportApps: apps }),
-    setCurrentApp: (app) => dispatch({ type: `SET_CURRENT_APP`, app: app })
+    saveApps: (apps) => dispatch({ type: `SAVE_APPS`, uportApps: apps })
   }
 }
 

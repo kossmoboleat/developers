@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import { connect } from 'react-redux'
-import { Container, Grid, Col } from '../../layouts/grid'
+import { Grid, Col } from '../../layouts/grid'
 import myAppsBg from '../../images/myapps-bg.svg'
 
 class AppList extends Component {
@@ -15,7 +15,6 @@ class AppList extends Component {
   componentDidMount () {
     let bgImageArray = this.state.bgImageStyles
     this.props.profile.uportApps.map((app, index) => {
-      console.log(app.configuration)
       if (app.configuration.profileImage) {
         let profileImageURL = 'https://ipfs.io' + app.configuration.profileImage
         bgImageArray[index] = {backgroundImage: `url(${profileImageURL})`}
@@ -28,7 +27,7 @@ class AppList extends Component {
   }
   handleAppItemClick (event, index) {
     this.props.clearCurrentApp()
-    this.props.setCurrentApp(this.props.profile.uportApps[index])
+    this.props.setCurrentApp(this.props.profile.uportApps[index], index)
     this.props.history.push('/myapps/detail')
   }
   render () {
@@ -75,7 +74,7 @@ const mapStateToProps = ({ profile, currentApp }) => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    setCurrentApp: (app) => dispatch({ type: `SET_CURRENT_APP`, app: app }),
+    setCurrentApp: (app, index) => dispatch({ type: `SET_CURRENT_APP`, app: app, index: index }),
     clearCurrentApp: () => dispatch({ type: `CLEAR_CURRENT_APP` })
   }
 }

@@ -76,8 +76,9 @@ class AppDetails extends Component {
   validateAppURL = () => {
     const { appURL='' } = this.state
     if(appURL === 'https://')
-      return true
-    this.setState({ validUrl: !appURL || isValidHttpsUrl(appURL) })
+      this.setState({ validUrl: true })
+    else
+      this.setState({ validUrl: !appURL || isValidHttpsUrl(appURL) })
   }
   handleAppDescriptionChange (e) {
     this.setState({appDescription: e.target.value})

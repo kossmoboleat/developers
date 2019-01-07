@@ -133,10 +133,6 @@ class AppRegComplete extends Component {
         Object.keys(uportApps).length > 0
           ? this.props.saveApps(uportApps)
           : this.props.saveApps(claim['uport-apps'])
-        this.props.setCurrentApp({
-          name: this.props.appDetails.appName,
-          configuration
-        })
         this.setState({ done: true })
       })
     } catch (e) {

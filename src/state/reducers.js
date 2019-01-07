@@ -1,6 +1,5 @@
 import { persistReducer } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
-import { combineReducers } from 'react-redux'
 
 import getEnv from '../utilities/getEnv'
 import featureFlags from '../../data/featureFlags.json'
@@ -32,7 +31,8 @@ export const reducer = (state = initialState, action) => {
   if (action.type === `SET_CURRENT_APP`) {
     return {
       ...state,
-      currentApp: action.app
+      currentApp: action.app,
+      appIndex: action.index
     }
   }
   if (action.type === `CLEAR_CURRENT_APP`) {

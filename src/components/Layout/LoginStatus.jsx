@@ -41,7 +41,7 @@ class LoginStatus extends Component {
     let appItems
     if (this.props.profile.uportApps) {
       appItems = this.props.profile.uportApps.map((app, index) =>
-        <li key={index} onClick={() => { this.props.setCurrentApp(this.props.profile.uportApps[index]) }}><Link to='/myapps/detail'>{app.name}</Link></li>
+        <li key={index} onClick={() => { this.props.setCurrentApp(this.props.profile.uportApps[index], index) }}><Link to='/myapps/detail'>{app.name}</Link></li>
       )
     }
     return (
@@ -56,6 +56,7 @@ class LoginStatus extends Component {
           {this.state.visible &&
             <ul className='myAppsDropdown'>
               <li className=''><Link to='/myapps/configurator'>Register Your App</Link></li>
+              {this.props.profile.uportApps ? <li className=''><Link to='/myapps/list'>MyApps List</Link></li> : null}
               {this.props.profile.uportApps ? appItems : null}
               <li className='logout' onClick={() => { this.handleLogout() }}><a href='#'>Logout</a></li>
             </ul>
@@ -81,7 +82,7 @@ const mapStateToProps = ({ profile }) => {
 const mapDispatchToProps = dispatch => {
   return {
     saveProfile: (profile) => dispatch({ type: `SAVE_PROFILE`, profile: profile }),
-    setCurrentApp: (app) => dispatch({ type: `SET_CURRENT_APP`, app: app }),
+    setCurrentApp: (app, index) => dispatch({ type: `SET_CURRENT_APP`, app: app, index: index }),
     logout: () => dispatch({ type: 'LOGOUT' })
   }
 }

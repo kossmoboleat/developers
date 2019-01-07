@@ -1,5 +1,5 @@
 import React from 'react'
-import { Container, Grid, Col, Spacer, small } from '../../layouts/grid'
+import { Grid, Col } from '../../layouts/grid'
 
 export default props => (<div className='detailsContainer'>
   <Grid>
@@ -8,10 +8,27 @@ export default props => (<div className='detailsContainer'>
         <h4 className='label'>App Name</h4>
         <p>{props.currentApp.name}</p>
       </div>
-      <div className='field'>
-        <h4 className='label'>Network</h4>
-        <p>{props.currentApp.configuration.network}</p>
-      </div>
+      {props.currentApp.configuration.url
+        ? <div className='field'>
+          <h4 className='label'>URL Address</h4>
+          <p>{props.currentApp.configuration.url}</p>
+        </div>
+        : null
+      }
+      {props.currentApp.configuration.description
+        ? <div className='field'>
+          <h4 className='label'>App Description</h4>
+          <p>{props.currentApp.configuration.description}</p>
+        </div>
+        : null
+      }
+      {props.currentApp.configuration.accentColor
+        ? <div className='field'>
+          <h4 className='label'>App Accent Color</h4>
+          <p>{props.currentApp.configuration.accentColor}</p>
+        </div>
+        : null
+      }
     </Col>
     <Col span={6}>
       <div className='previewContainer'>
