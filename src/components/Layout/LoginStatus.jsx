@@ -1,19 +1,25 @@
 import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { uPortConnect } from '../../utilities/uPortConnectSetup'
-import Link from 'gatsby-link'
+import { Link } from 'gatsby'
 import onClickOutside from 'react-onclickoutside'
+
+import * as actions from '../../actions'
+import LoginModal from '../UportLogin'
 
 class LoginStatus extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      visible: false
+      visible: false,
+      loginModal: false
     }
     this.toggleMenu = this.toggleMenu.bind(this)
     this.loginRequest = this.loginRequest.bind(this)
     this.handleLogout = this.handleLogout.bind(this)
+  }
+  componentDidMount() {
+    // this.props.initCredentials()
   }
   toggleMenu (e) {
     e.preventDefault()
@@ -24,17 +30,23 @@ class LoginStatus extends Component {
   }
   loginRequest (e) {
     e.preventDefault()
-    try {
-      uPortConnect.requestDisclosure({requested: ['name'], verified: ['uport-apps'], notifications: true})
-      uPortConnect.onResponse('disclosureReq').then(response => {
-        this.props.saveProfile({name: response.payload.name, did: response.payload.did, uportApps: response.payload['uport-apps']})
-      })
-    } catch (e) {
-      console.log(e)
-    }
+    this.setState({ loginModal: true })
+  }
+  handleLoginSuccess = (profile) => {
+    this.setState({ loginModal: false })
+    this.props.saveProfile({
+      name: profile.name,
+      did: profile.did,
+      uportApps: profile['uport-apps'] || [],
+      pushToken: profile.pushToken,
+      publicEncKey: profile.boxPub
+    })
+  }
+  hideLoginModal = () => {
+    this.setState({ loginModal: false })
   }
   handleLogout () {
-    uPortConnect.logout()
+    // uPortConnect.logout()
     this.props.logout()
   }
   render () {
@@ -63,6 +75,10 @@ class LoginStatus extends Component {
           }
         </div>
         }
+        <LoginModal
+          show={this.state.loginModal}
+          onClose={this.hideLoginModal}
+          onLoginSuccess={this.handleLoginSuccess} />
       </div>
     )
   }
@@ -79,12 +95,16 @@ const mapStateToProps = ({ profile }) => {
   return { profile }
 }
 
-const mapDispatchToProps = dispatch => {
-  return {
-    saveProfile: (profile) => dispatch({ type: `SAVE_PROFILE`, profile: profile }),
-    setCurrentApp: (app, index) => dispatch({ type: `SET_CURRENT_APP`, app: app, index: index }),
-    logout: () => dispatch({ type: 'LOGOUT' })
+const mapDispatchToProps = dispatch => ({
+  saveProfile(profile) {
+    dispatch(actions.saveProfile(profile))
+  },
+  setCurrentApp(app, index) {
+    dispatch(actions.setCurrentApp(app, index))
+  },
+  logout() {
+    dispatch(actions.logout())
   }
-}
+})
 
 export default connect(mapStateToProps, mapDispatchToProps)(onClickOutside(LoginStatus))

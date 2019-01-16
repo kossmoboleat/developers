@@ -3,7 +3,8 @@ import Helmet from 'react-helmet'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import Link from 'gatsby-link'
+import { graphql, Link, StaticQuery } from 'gatsby'
+
 import SiteHeader from '../../components/Layout/Header'
 import config from '../../../data/SiteConfig'
 import '../../layouts/css/myapps.css'
@@ -110,7 +111,7 @@ const MyAppsHeadContainer = styled.div`
   background: ${props => props.theme.brand}
 `
 
-export const pageQuery = graphql`
+const query = graphql`
 query AppManagerSnippetQuery {
     allMarkdownRemark(
       limit: 2000
@@ -161,4 +162,8 @@ const mapStateToProps = ({ profile, currentApp }) => {
   return { profile, currentApp }
 }
 
-export default connect(mapStateToProps)(MyAppsSampleCodePage)
+const MyAppsSampleCodePageContainer = connect(mapStateToProps)(MyAppsSampleCodePage)
+
+export default (props => <StaticQuery
+  query={query}
+  render={data => <MyAppsSampleCodePageContainer {...props} data={data} /> } />)

@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { Credentials } from 'uport-credentials'
 import styled from 'styled-components'
 import { ChromePicker } from 'react-color'
+
 import CancelModal from './CancelModal'
 import Footer from './Footer'
 import { Container, Grid, Col, Spacer } from '../../../layouts/grid'
@@ -100,7 +101,7 @@ class AppDetails extends Component {
   }
   async handleBgImageUpload () {
     // Generate image from accentColor and upload to IPFS
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       let canvas = document.getElementById('canvas')
       let ctx = canvas.getContext('2d')
       ctx.fillStyle = this.state.accentColor
@@ -127,7 +128,7 @@ class AppDetails extends Component {
         appNameValid: false,
         duplicateAppName: (uportAppNames.indexOf(this.state.appName) >= 0)
       })
-    : this.setState({ appNameValid: true }, async () => {
+    : this.setState({ appNameValid: true }, () => {
       if (this.state.appNameValid && this.state.validUrl) {
         const {did, privateKey} = Credentials.createIdentity()
         const credentials = new Credentials({
@@ -140,27 +141,28 @@ class AppDetails extends Component {
           this.state.accentColor !== '#5C50CA') &&
           this.state.ipfsBgHash === null
         ) {
-          await this.handleBgImageUpload()
+          this.handleBgImageUpload().then(() => {
+            this.track('App Configurator Submit Clicked', {
+              step: 'App Details',
+              value: {
+                appName: this.state.appName,
+                appURL: this.state.appURL
+              }
+            })
+            this.props.getChildState('appDetails', {
+              appName: this.state.appName,
+              appURL: this.state.appURL.replace(/^https:\/\//, ''),
+              appDescription: this.state.appDescription,
+              ipfsLogoHash: this.state.ipfsLogoHash,
+              ipfsBgHash: this.state.ipfsBgHash,
+              accentColor: this.state.accentColor,
+              appIdentity: {
+                did: this.state.did,
+                pk: this.state.pk
+              }
+            })
+          })
         }
-        this.track('App Configurator Submit Clicked', {
-          step: 'App Details',
-          value: {
-            appName: this.state.appName,
-            appURL: this.state.appURL
-          }
-        })
-        this.props.getChildState('appDetails', {
-          appName: this.state.appName,
-          appURL: this.state.appURL.replace(/^https:\/\//, ''),
-          appDescription: this.state.appDescription,
-          ipfsLogoHash: this.state.ipfsLogoHash,
-          ipfsBgHash: this.state.ipfsBgHash,
-          accentColor: this.state.accentColor,
-          appIdentity: {
-            did: this.state.did,
-            pk: this.state.pk
-          }
-        })
       }
     })
   }
@@ -493,7 +495,7 @@ const UploadProgress = styled.div`
   text-align: center;
 `
 const Loading = styled.img`
-  animation: ${spin};
+  ${spin}
   margin: 10px 0;
   width: 24px;
 `

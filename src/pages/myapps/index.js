@@ -2,10 +2,14 @@ import React from 'react'
 import Helmet from 'react-helmet'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
-import { uPortConnect } from '../../utilities/uPortConnectSetup'
 import { connect } from 'react-redux'
-import Link from 'gatsby-link'
+import { graphql, Link, StaticQuery } from 'gatsby'
 
+import Layout from '../../components/layout'
+import LoginModal from '../../components/UportLogin'
+import * as actions from '../../actions'
+// import { uPortConnect } from '../../utilities/uPortConnectSetup'
+import SiteHeader from '../../components/Layout/Header'
 import config from '../../../data/SiteConfig'
 import myAppsBg from '../../images/myapps-bg.svg'
 import greenTick from '../../images/greenTick.svg'
@@ -17,29 +21,52 @@ class MyApps extends React.Component {
   constructor (props) {
     super(props)
     this.state = {
-      environment: null
+      environment: null,
+      loginModal: false
     }
     this.loginRequest = this.loginRequest.bind(this)
   }
   loginRequest (e) {
     e.preventDefault()
-    const history = this.props.history
-    try {
-      uPortConnect.requestDisclosure({requested: ['name'], verified: ['uport-apps'], notifications: true})
-      uPortConnect.onResponse('disclosureReq').then(response => {
-        this.props.saveProfile({name: response.payload.name, did: response.payload.did, uportApps: response.payload['uport-apps']})
-        if (this.props.profile.uportApps) {
-          history.push('/myapps/list')
-        } else {
-          history.push('/myapps/configurator')
-        }
-      })
-    } catch (e) {
-      console.log(e)
+    // const history = this.props.history
+    // try {
+    //   uPortConnect.requestDisclosure({requested: ['name'], verified: ['uport-apps'], notifications: true})
+    //   uPortConnect.onResponse('disclosureReq').then(response => {
+    //     this.props.saveProfile({name: response.payload.name, did: response.payload.did, uportApps: response.payload['uport-apps']})
+    //     if (this.props.profile.uportApps) {
+    //       history.push('/myapps/list')
+    //     } else {
+    //       history.push('/myapps/configurator')
+    //     }
+    //   })
+    // } catch (e) {
+    //   console.log(e)
+    // }
+    this.setState({ loginModal: true })
+  }
+  handleLoginSuccess = (profile) => {
+    this.setState({ loginModal: false })
+    this.props.saveProfile({
+      name: profile.name,
+      did: profile.did,
+      uportApps: profile['uport-apps'] || [],
+      pushToken: profile.pushToken,
+      publicEncKey: profile.boxPub
+    })
+    if(this.props.profile.uportApps) {
+      this.props.redirectToAppList()
+    } else {
+      this.props.redirectToAppConfig()
     }
   }
+  hideLoginModal = () => {
+    this.setState({ loginModal: false })
+  }
+  hideVerificationModal = () => {
+    this.setState({ verif: false })
+  }
   render () {
-    return (
+    return (<Layout location={this.props.location}>
       <div className='index-container'>
         <Helmet title={config.siteTitle} />
         <main>
@@ -73,8 +100,12 @@ class MyApps extends React.Component {
             </div>
           </BodyContainer>
         </main>
+        <LoginModal
+          show={this.state.loginModal}
+          onLoginSuccess={this.handleLoginSuccess}
+          onClose={this.hideLoginModal} />
       </div>
-    )
+    </Layout>)
   }
 }
 
@@ -114,7 +145,7 @@ const BodyContainer = styled.div`
     display: none;
     height: 100vh;
     background-image: url(${myAppsBg});
-    padding: 0;
+    padding: 0 !important;
     overflow: hidden;
     ${medium('display: block;')}
   }
@@ -134,7 +165,7 @@ const Logo = styled.img`
   width: 120px;
 `
 
-export const pageQuery = graphql`
+const query = graphql`
 query MyAppsQuery {
     allMarkdownRemark(
       limit: 2000
@@ -181,12 +212,24 @@ MyApps.propTypes = {
   saveProfile: PropTypes.func.isRequired
 }
 
-const mapStateToProps = ({ profile }) => {
-  return { profile }
-}
+const mapStateToProps = ({ profile }) => ({
+  profile
+})
 
-const mapDispatchToProps = dispatch => {
-  return { saveProfile: (profile) => dispatch({ type: `SAVE_PROFILE`, profile: profile }) }
-}
+const mapDispatchToProps = dispatch => ({
+  redirectToAppConfig() {
+    dispatch(actions.redirectToAppConfig())
+  },
+  redirectToAppList() {
+    dispatch(actions.redirectToAppList())
+  },
+  saveProfile(profile) {
+    dispatch(actions.saveProfile(profile))
+  }
+})
 
-export default connect(mapStateToProps, mapDispatchToProps)(MyApps)
+const MyAppsContainer = connect(mapStateToProps, mapDispatchToProps)(MyApps)
+
+export default (props => <StaticQuery
+  query={query}
+  render={data => <MyAppsContainer {...props} data={data} /> } />)

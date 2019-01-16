@@ -1,5 +1,8 @@
 import React from "react";
 import Helmet from "react-helmet";
+import { graphql, StaticQuery } from 'gatsby'
+
+import Layout from "../components/layout"
 import PostListing from "../components/PostListing/PostListing";
 import styled from 'styled-components'
 import RehypeReact from 'rehype-react'
@@ -10,25 +13,25 @@ import DevSurvey from '../components/Survey'
 import config from '../../data/SiteConfig'
 import TableOfContents from '../components/Layout/TableOfContents'
 import SecondaryTitle from '../components/Layout/html/SecondaryTitle'
+import OrderedList from '../components/Layout/html/OrderedList'
+import UnorderedList from '../components/Layout/html/UnorderedList'
 import CtaButton from '../components/CtaButton'
 import Announcement from '../components/Announcement'
 import getHeadings from "../utilities/getHeadings"
-import Link from 'gatsby-link'
 
-export default class CategoryTemplate extends React.Component {
+class CategoryTemplate extends React.Component {
   getContentWindow = () => this.contentWindow
   render() {
-    const category = this.props.pathContext.category;
+    const category = this.props.pageContext.category;
     const postEdges = this.props.data.allMarkdownRemark.edges;
     const types = []
 
     const renderAst = new RehypeReact({
       createElement: React.createElement,
       components: {
-        'h2': SecondaryTitle,
-        a: props => !props.href || props.href.match(/^https?:\/\//)
-          ? <a {...props} />
-          : <Link to={props.href} {...props} />
+        h2: SecondaryTitle,
+        ul: UnorderedList,
+        ol: OrderedList
       }
     }).Compiler
 
@@ -57,11 +60,11 @@ export default class CategoryTemplate extends React.Component {
     if (!post.id) {
       post.category_id = config.postDefaultCategoryID
     }
-    return (
-    <div>
+
+    return (<Layout location={this.props.location}>
+      <React.Fragment>
         <Helmet>
           <title>{`${post.title} | ${config.siteTitle}`}</title>
-
         </Helmet>
         <SEO postPath={slug} postNode={postNode} postSEO />
         <BodyGrid>
@@ -69,7 +72,7 @@ export default class CategoryTemplate extends React.Component {
             <SiteHeader
               activeType={type}
               location={this.props.location}
-              types={this.props.data.navTypes}
+              types={this.props.navTypes}
             />
           </HeaderContainer>
           <ToCContainer>
@@ -80,7 +83,7 @@ export default class CategoryTemplate extends React.Component {
               getContentWindow={this.getContentWindow}
             />
           </ToCContainer>
-          <BodyContainer innerRef={ref => this.contentWindow=ref}>
+          <BodyContainer ref={ref => this.contentWindow=ref}>
             <Announcement data={this.props.data} />
             <CtaButton to={`${post.source}`}>
               Edit
@@ -91,15 +94,8 @@ export default class CategoryTemplate extends React.Component {
             <DevSurvey />
           </BodyContainer>
         </BodyGrid>
-      </div>
-
-      // <div className="category-container">
-      //   <Helmet
-      //     title={`Posts in category "${category}" | ${config.siteTitle}`}
-      //   />
-      //   <PostListing postEdges={postEdges} />
-      // </div>
-    );
+      </React.Fragment>
+    </Layout>)
   }
 }
 
@@ -191,8 +187,7 @@ const ToCContainer = styled.div`
   }
 `
 
-/* eslint no-undef: "off"*/
-export const pageQuery = graphql`
+const query = graphql`
   query CategoryPage($category: String, $slug: String) {
     allMarkdownRemark(
       limit: 1000
@@ -273,4 +268,8 @@ export const pageQuery = graphql`
         }
       }
   }
-`;
+`
+
+export default (props => <StaticQuery
+  query={query}
+  render={data => <CategoryTemplate {...props} data={data} /> } />)

@@ -1,13 +1,13 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
-import Link from 'gatsby-link'
-import { uPortConnect } from '../../../utilities/uPortConnectSetup'
+import { Link } from 'gatsby'
 import cog from '../../../images/cog.svg'
 import tick from '../../../images/greenTick.svg'
 import imageBg from '../../../images/Products-BG.svg'
 import UnorderedList from '../../Layout/html/UnorderedList'
 import VerificationModal from './VerificationModal'
 import CopyButton from './CopyButton'
+import SendVerificationModal from '../../UportVerification'
 import { Container, Grid, Col, medium } from '../../../layouts/grid'
 import copyToClipboard from '../../../helpers/copyToClipboard'
 import track, { trackPage } from '../../../utilities/track'
@@ -79,7 +79,9 @@ class AppRegComplete extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      verificationModal: false
+      verificationModal: false,
+      sendVerificationModal: false,
+      claim: null
     }
   }
   componentDidMount() {
@@ -122,22 +124,30 @@ class AppRegComplete extends Component {
     } else {
       claim = {'uport-apps': [claim]}
     }
-    try {
-      uPortConnect.sendVerification({
-        sub: this.props.profile.did,
-        claim
-      }, 'ADD-APP', {
-        notifications: true
-      })
-      uPortConnect.onResponse('ADD-APP').then(payload => {
-        Object.keys(uportApps).length > 0
-          ? this.props.saveApps(uportApps)
-          : this.props.saveApps(claim['uport-apps'])
-        this.setState({ done: true })
-      })
-    } catch (e) {
-      console.log(e)
-    }
+    // try {
+    //   uPortConnect.sendVerification({
+    //     sub: this.props.profile.did,
+    //     claim
+    //   }, 'ADD-APP', {
+    //     notifications: true
+    //   })
+    //   uPortConnect.onResponse('ADD-APP').then(payload => {
+    //     Object.keys(uportApps).length > 0
+    //       ? this.props.saveApps(uportApps)
+    //       : this.props.saveApps(claim['uport-apps'])
+    //     this.setState({ done: true })
+    //   })
+    // } catch (e) {
+    //   console.log(e)
+    // }
+    this.setState({
+      claim,
+      sendVerificationModal: true
+    })
+    if(Object.keys(uportApps).length)
+      this.props.saveApps(uportApps)
+    else
+      this.props.saveApps(claim['uport-apps'])
   }
   handleCopy = (str, id) => () => {
     copyToClipboard(str);
@@ -148,6 +158,12 @@ class AppRegComplete extends Component {
         appURL: this.props.appDetails.appURL,
         content: id
       }
+    })
+  }
+  hideUportVerificationModal = () => {
+    this.setState({
+      claim: null,
+      sendVerificationModal: false
     })
   }
   hideVerificationModal = () => {
@@ -178,7 +194,7 @@ class AppRegComplete extends Component {
   }
   render () {
     const { appDetails, appEnvironment, signingKey, ipfsProfileHash } = this.props
-    const { verificationModal } = this.state;
+    const { verificationModal, sendVerificationModal, claim } = this.state;
     return (<div>
       <Section className={verificationModal ? 'blurred' : ''}>
         <Success>
@@ -326,6 +342,10 @@ class AppRegComplete extends Component {
           </Pre>
         </CodeContainer>
       </VerificationModal>
+      <SendVerificationModal
+        show={claim && sendVerificationModal}
+        onClose={this.hideUportVerificationModal}
+        claim={claim} />
     </div>)
   }
 }

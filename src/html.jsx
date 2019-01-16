@@ -4,31 +4,8 @@
 import React from 'react'
 import favicon from './favicon.png'
 
-let inlinedStyles = ''
-if (process.env.NODE_ENV === "production") {
-  try {
-    /* eslint import/no-webpack-loader-syntax: off */
-    inlinedStyles = require("!raw-loader!../public/styles.css");
-  } catch (e) {
-    /* eslint no-console: "off"*/
-    console.log(e);
-  }
-}
-
 export default class HTML extends React.Component {
-  componentDidMount () {
-    
-  }
   render() {
-    let css;
-    if (process.env.NODE_ENV === "production") {
-      css = (
-        <style
-          id="gatsby-inlined-css"
-          dangerouslySetInnerHTML={{ __html: inlinedStyles }}
-        />
-      );
-    }
     return (
       <html lang="en">
         <head>
@@ -40,7 +17,6 @@ export default class HTML extends React.Component {
           {this.props.headComponents}
           <link rel="shortcut icon" href={favicon} />
           <script type='text/javascript' src='https://cdn.jsdelivr.net/npm/docsearch.js@2/dist/cdn/docsearch.min.js' />
-          {css}
           <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/docsearch.js@2/dist/cdn/docsearch.min.css' />
         </head>
         <body>

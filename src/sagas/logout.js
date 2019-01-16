@@ -1,9 +1,9 @@
 import { takeEvery } from 'redux-saga/effects'
-import history from '../utilities/history'
+import { navigate } from 'gatsby'
 
 function* onLogout() {
   yield takeEvery('LOGOUT', function() {
-    history.push('/')
+    navigate('/')
   });
 }
 

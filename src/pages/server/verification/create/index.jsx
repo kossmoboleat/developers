@@ -1,7 +1,9 @@
 import React from 'react'
 import Helmet from 'react-helmet'
 import styled from 'styled-components'
-import Link from 'gatsby-link'
+import { graphql, Link, StaticQuery } from 'gatsby'
+
+import Layout from '../../../../components/layout'
 import SEO from '../../../../components/SEO/SEO'
 import SiteHeader from '../../../../components/Layout/Header'
 import SiteFooter from '../../../../components/Layout/Footer'
@@ -13,7 +15,7 @@ import AutoLinkText from 'react-autolink-text2'
 class ServerVerification extends React.Component {
   render () {
     const postEdges = this.props.data.allMarkdownRemark.edges
-    return (
+    return (<Layout location={this.props.location}>
       <IndexContainer>
         <Helmet title={config.siteTitle} />
         <SEO postEdges={postEdges} />
@@ -47,11 +49,10 @@ class ServerVerification extends React.Component {
           </FooterContainer>
         </main>
       </IndexContainer>
-    );
+    </Layout>)
   }
 }
 
-export default ServerVerification
 const IndexContainer = styled.div`
 a {
   text-decoration: none;
@@ -117,8 +118,7 @@ const FooterContainer = styled.footer`
   clear: all;
 `
 
-/* eslint no-undef: "off"*/
-export const pageQuery = graphql`
+const query = graphql`
   query CreateVerificationQuery {
     allMarkdownRemark(
       limit: 2000
@@ -169,4 +169,8 @@ export const pageQuery = graphql`
         }
       }
   }
-`;
+`
+
+export default (props => <StaticQuery
+  query={query}
+  render={data => <ServerVerification {...props} data={data} /> } />)

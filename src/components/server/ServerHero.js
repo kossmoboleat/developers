@@ -5,7 +5,7 @@ import bgPatternWhite from '../../images/bg-pattern-white.svg'
 import heroImg from '../../images/server_hero.svg'
 import track from '../../utilities/track'
 import { Container, Grid, Col, medium } from '../../layouts/grid'
-import Link from 'gatsby-link'
+import { Link } from 'gatsby'
 
 class ServerHero extends React.Component {
   track = (name) => () => {

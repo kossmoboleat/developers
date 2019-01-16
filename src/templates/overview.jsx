@@ -3,6 +3,9 @@ import Helmet from 'react-helmet'
 import styled from 'styled-components'
 import RehypeReact from 'rehype-react'
 import AutoLinkText from 'react-autolink-text2'
+import { graphql } from 'gatsby'
+
+import Layout from "../components/layout"
 import SEO from '../components/SEO/SEO'
 import SiteHeader from '../components/Layout/Header'
 import DevSurvey from '../components/Survey.jsx'
@@ -14,9 +17,8 @@ import UnorderedList from '../components/Layout/html/UnorderedList'
 import CtaButton from '../components/CtaButton'
 import Announcement from '../components/Announcement'
 import getHeadings from "../utilities/getHeadings"
-import Link from 'gatsby-link'
 
-export default class OverviewTemplate extends React.Component {
+class OverviewTemplate extends React.Component {
   getContentWindow = () => this.contentWindow
   render () {
     const renderAst = new RehypeReact({
@@ -24,13 +26,10 @@ export default class OverviewTemplate extends React.Component {
       components: {
         h2: SecondaryTitle,
         ul: UnorderedList,
-        ol: OrderedList,
-        a: props => !props.href || props.href.match(/^https?:\/\//)
-          ? <a {...props} />
-          : <Link to={props.href} {...props} />
+        ol: OrderedList
       }
     }).Compiler
-    const { slug } = this.props.pathContext
+    const { slug } = this.props.pageContext
     const postNode = this.props.data.postBySlug
     const post = postNode.frontmatter
     const type = post.type
@@ -54,8 +53,8 @@ export default class OverviewTemplate extends React.Component {
     if (!post.id) {
       post.category_id = config.postDefaultCategoryID
     }
-    return (
-      <div>
+    return (<Layout location={this.props.location}>
+      <React.Fragment>
         <Helmet>
           <title>{`${post.title} | ${config.siteTitle}`}</title>
         </Helmet>
@@ -65,7 +64,7 @@ export default class OverviewTemplate extends React.Component {
             <SiteHeader
               activeType={type}
               location={this.props.location}
-              types={this.props.data.navTypes}
+              types={this.props.navTypes}
             />
           </HeaderContainer>
           <ToCContainer>
@@ -76,7 +75,7 @@ export default class OverviewTemplate extends React.Component {
               getContentWindow={this.getContentWindow}
             />
           </ToCContainer>
-          <BodyContainer innerRef={ref => this.contentWindow=ref}>
+          <BodyContainer ref={ref => this.contentWindow=ref}>
             <Announcement data={this.props.data} />
             <CtaButton to={`${post.source}`}>
               Edit
@@ -87,8 +86,8 @@ export default class OverviewTemplate extends React.Component {
             <DevSurvey />
           </BodyContainer>
         </BodyGrid>
-      </div>
-    )
+      </React.Fragment>
+    </Layout>)
   }
 }
 
@@ -180,9 +179,8 @@ const ToCContainer = styled.div`
   }
 `
 
-/* eslint no-undef: "off" */
-export const pageQuery = graphql`
-  query OverviewBySlug($slug: String!) {
+export const query = graphql`
+  query ($slug: String!) {
     allPostTitles: allMarkdownRemark(
       filter: { frontmatter: { index: { ne: null } } }
     ){
@@ -276,4 +274,6 @@ export const pageQuery = graphql`
         }
       }
   }
-`;
+`
+
+export default OverviewTemplate

@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-import Link from 'gatsby-link'
+import { Link } from 'gatsby'
 import Navigation from './Navigation'
 import Search from '../Search'
 import bannerImg from '../../images/Horizontal-Logo.svg'

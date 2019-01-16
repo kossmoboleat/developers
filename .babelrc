@@ -1,12 +1,22 @@
 {
-  "plugins": ["lodash",
-              "transform-react-pug",
-              "transform-react-jsx"],
+  "plugins": [
+    "lodash",
+    "transform-react-pug",
+    "@babel/plugin-transform-react-jsx",
+    "@babel/plugin-transform-runtime",
+    "@babel/plugin-transform-regenerator",
+    "@babel/plugin-proposal-class-properties",
+    "@babel/plugin-syntax-dynamic-import",
+    "babel-plugin-styled-components"
+  ],
   "presets": [
-    ["env", {
-      "targets": {
-        "node": "current"
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "node": "current"
+        }
       }
-    }]
+    ]
   ]
 }

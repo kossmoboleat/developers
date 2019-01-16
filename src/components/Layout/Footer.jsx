@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 import track from '../../utilities/track'
-import Link from 'gatsby-link'
+import { Link } from 'gatsby'
 
 const FooterContainer = styled.section`
   display: flex;

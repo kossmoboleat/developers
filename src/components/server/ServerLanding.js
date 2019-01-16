@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import styled from 'styled-components'
-import Link from 'gatsby-link'
+import { Link } from 'gatsby'
 import serverImg from '../../images/server-landing.png'
 import arrowImg from '../../images/ArrowBlack.png'
 import blueTick from '../../images/blue-tick.svg'

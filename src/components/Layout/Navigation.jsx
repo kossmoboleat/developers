@@ -1,7 +1,8 @@
 import React from 'react'
-import Link from 'gatsby-link'
+import { Link } from 'gatsby'
 import styled from 'styled-components'
 import Menu from 'react-burger-menu/lib/menus/slide'
+
 import LoginStatus from './LoginStatus'
 import Search from '../Search'
 import Flagged from './Flagged'

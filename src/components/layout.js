@@ -3,12 +3,12 @@ import { connect } from 'react-redux'
 import Helmet from "react-helmet";
 import styled, {ThemeProvider} from "styled-components"
 import config from "../../data/SiteConfig";
-import "./css/normalize.css"
-import "./css/webflow.css"
-import "./css/uport-51f8fe-896815bc956b8e53e437c9c3db.webflow.css"
+import "../layouts/css/normalize.css"
+import "../layouts/css/webflow.css"
+import "../layouts/css/uport-51f8fe-896815bc956b8e53e437c9c3db.webflow.css"
 import "../../node_modules/prism-themes/themes/prism-duotone-light.css"
-import "./css/index.css";
-import theme from './theme'
+import "../layouts/css/index.css"
+import theme from '../layouts/theme'
 import getSelectedText from '../utilities/getSelectedText'
 import track from '../utilities/track'
 
@@ -71,7 +71,7 @@ class MainLayout extends React.Component {
           <meta name='viewport' content='width=device-width, initial-scale=1' />
         </Helmet>
         <ThemeProvider theme={theme}>
-          {children()}
+          {children}
         </ThemeProvider>
       </div>
     );

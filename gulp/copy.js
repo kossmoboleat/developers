@@ -1,15 +1,15 @@
 import gulp from 'gulp';
 // import safeSymlink from './safeSymlink';
 
-let $g = require('gulp-load-plugins')();
+// let $g = require('gulp-load-plugins')();
 //var frontMatter = require('gulp-front-matter');
 
 const copyMarkdown = () => {
-  // Symlink files
-  // safeSymlink("./src/images", "./static/images");
-
-  // Copy files.
   return new Promise((resolve, reject) => {
+    // Symlink files
+    // safeSymlink("./src/images", "./static/images");
+
+    // Copy files.
     gulp.src(['./markdown/docs/**/*',
               './markdown/specs/**/*'
              ])

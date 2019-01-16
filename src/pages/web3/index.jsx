@@ -1,6 +1,9 @@
 import React from 'react'
 import Helmet from 'react-helmet'
 import styled from 'styled-components'
+import { graphql } from 'gatsby'
+
+import Layout from '../../components/layout'
 import SEO from '../../components/SEO/SEO'
 import SiteHeader from '../../components/Layout/Header'
 import SiteFooter from '../../components/Layout/Footer'
@@ -15,7 +18,7 @@ import bgPattern from '../../images/bg-pattern-gray.svg'
 class Web3 extends React.Component {
   render () {
     const postEdges = this.props.data.allMarkdownRemark.edges
-    return (
+    return (<Layout location={this.props.location}>
       <div className='index-container'>
         <Helmet title={config.siteTitle} />
         <SEO postEdges={postEdges} />
@@ -37,7 +40,7 @@ class Web3 extends React.Component {
           </FooterContainer>
         </main>
       </div>
-    );
+    </Layout>)
   }
 }
 
@@ -74,8 +77,7 @@ const FooterContainer = styled.footer`
   clear: all;
 `
 
-/* eslint no-undef: "off"*/
-export const pageQuery = graphql`
+export const query = graphql`
   query Web3Query {
     allMarkdownRemark(
       limit: 2000

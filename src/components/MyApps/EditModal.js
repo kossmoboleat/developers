@@ -1,7 +1,7 @@
 import React from 'react'
-import { uPortConnect } from '../../utilities/uPortConnectSetup'
 import styled from 'styled-components'
-import { addFile } from '../../utilities/ipfs'
+
+import SendVerificationModal from '../UportVerification'
 import lightPatternBg from '../../images/configuratorBg.svg'
 import myAppsBg from '../../images/myapps-bg.svg'
 import successImage from '../../images/success-icon.svg'
@@ -11,6 +11,7 @@ import { ChromePicker } from 'react-color'
 import { Grid, Col, Spacer, medium } from '../../layouts/grid'
 import { default as track, trackPage } from '../../utilities/track'
 import { isValidHttpsUrl } from '../../utilities/isValidUrl'
+import { addFile } from '../../utilities/ipfs'
 import spin from '../../utilities/spinanim'
 import '../../layouts/css/myapps.css'
 
@@ -38,7 +39,9 @@ class EditModal extends React.Component {
       validUrl: appURL === "https://" || isValidHttpsUrl(appURL),
       isUploading: false,
       uportAppNames: props.uportApps.map(app => app.name),
-      isBgImageUploading: false
+      isBgImageUploading: false,
+      sendVerificationModal: false,
+      claim: null
     }
     this.handleAppNameChange = this.handleAppNameChange.bind(this)
     this.handleAppURLChange = this.handleAppURLChange.bind(this)
@@ -150,7 +153,6 @@ class EditModal extends React.Component {
         name: this.state.appName,
         configuration
       }
-
       if (this.props.uportApps) {
         uportApps[this.props.appIndex] = claim
         claim = {'uport-apps': uportApps}
@@ -159,193 +161,211 @@ class EditModal extends React.Component {
       }
       this.props.onClose()
 
-      try {
-        uPortConnect.sendVerification({
-          sub: this.props.profile.did,
-          claim
-        }, 'EDIT-APP', {
-          notifications: true
-        })
-        uPortConnect.onResponse('EDIT-APP').then(payload => {
-          this.props.setCurrentApp(uportApps[this.props.appIndex], this.props.appIndex)
-          this.props.saveApps(uportApps)
-        })
-      } catch (e) {
-        console.log(e)
-      }
+      // try {
+      //   uPortConnect.sendVerification({
+      //     sub: this.props.profile.did,
+      //     claim
+      //   }, 'EDIT-APP', {
+      //     notifications: true
+      //   })
+      //   uPortConnect.onResponse('EDIT-APP').then(payload => {
+      //     this.props.setCurrentApp(uportApps[this.props.appIndex], this.props.appIndex)
+      //     this.props.saveApps(uportApps)
+      //   })
+      // } catch (e) {
+      //   console.log(e)
+      // }
+      this.setState({
+        claim,
+        sendVerificationModal: true
+      })
+      this.props.setCurrentApp(uportApps[this.props.appIndex], this.props.appIndex)
+      this.props.saveApps(uportApps)
     }
+  }
+  hideUportVerificationModal = () => {
+    this.setState({
+      claim: null,
+      sendVerificationModal: false
+    })
   }
   render() {
     const { app, uportApps, children, show } = this.props
-    const { isUploading, isBgImageUploading, validUrl } = this.state
+    const { isUploading, isBgImageUploading, validUrl, claim, sendVerificationModal } = this.state
     const bgImageStyle = {backgroundImage: this.state.profileImage
       ? `url(https://ipfs.io${this.state.profileImage})`
       : `url(${myAppsBg})`}
-    return (<Modal show={show}>
-      <Backdrop />
-      <Content>
-        <a className='returnLink' onClick={this.handleClose}>Cancel</a>
-        <h1>Edit App Details</h1>
+    return (<React.Fragment>
+      <Modal show={show}>
+        <Backdrop />
+        <Content>
+          <a className='returnLink' onClick={this.handleClose}>Cancel</a>
+          <h1>Edit App Details</h1>
 
-        <ModalContent>
-          <form onSubmit={this.handleSubmit}>
-            <Grid>
+          <ModalContent>
+            <form onSubmit={this.handleSubmit}>
+              <Grid>
+                <Spacer span={1} />
+                <Col span={10}>
+                <label htmlFor='appName'>App Name</label>
+                <div className={(!this.state.appNameValid) ? 'fieldError' : ''}>
+                  <input
+                    type='text'
+                    id='appName'
+                    placeholder='Give your app a name'
+                    value={this.state.appName}
+                    onChange={this.handleAppNameChange}
+                    ref={r => this.txtAppName=r} />
+                    {(!this.state.appNameValid) &&
+                      <span className='error'>
+                        <img src={errorIcon} />
+                        {this.state.duplicateAppName
+                          ? 'App name already in use'
+                          : 'App name is required'
+                        }
+                      </span>
+                    }
+                </div>
+              </Col>
+              <Spacer span={1} />
               <Spacer span={1} />
               <Col span={10}>
-              <label htmlFor='appName'>App Name</label>
-              <div className={(!this.state.appNameValid) ? 'fieldError' : ''}>
-                <input
-                  type='text'
-                  id='appName'
-                  placeholder='Give your app a name'
-                  value={this.state.appName}
-                  onChange={this.handleAppNameChange}
-                  ref={r => this.txtAppName=r} />
-                  {(!this.state.appNameValid) &&
+                <LabelRow>
+                  <label htmlFor='appURL'>
+                    URL Address {" "}
+                    <Subtle>(optional)</Subtle>
+                  </label>
+                  <Tooltip>
+                    <Tooltip.Hotspot>?</Tooltip.Hotspot>
+                    <Tooltip.Popover>
+                      <Tooltip.Body>
+                        <Tooltip.Header>Why we ask for URL address?</Tooltip.Header>
+                        <p>
+                          Providing a URL can help establish trust with
+                          your application. Following registration, we include
+                          instructions for verifying ownership of your domain.
+                        </p>
+                      </Tooltip.Body>
+                    </Tooltip.Popover>
+                  </Tooltip>
+                </LabelRow>
+                <div className={!this.state.validUrl ? 'fieldError' : ''}>
+                  <input
+                    type='text'
+                    id='appURL'
+                    placeholder='https://yourapphomepage.com'
+                    value={this.state.appURL}
+                    onChange={this.handleAppURLChange}
+                    onBlur={this.validateAppURL}
+                    ref={r => this.txtAppURL=r} />
+                  {validUrl ||
                     <span className='error'>
                       <img src={errorIcon} />
-                      {this.state.duplicateAppName
-                        ? 'App name already in use'
-                        : 'App name is required'
-                      }
-                    </span>
-                  }
-              </div>
-            </Col>
-            <Spacer span={1} />
-            <Spacer span={1} />
-            <Col span={10}>
-              <LabelRow>
-                <label htmlFor='appURL'>
-                  URL Address {" "}
-                  <Subtle>(optional)</Subtle>
-                </label>
-                <Tooltip>
-                  <Tooltip.Hotspot>?</Tooltip.Hotspot>
-                  <Tooltip.Popover>
-                    <Tooltip.Body>
-                      <Tooltip.Header>Why we ask for URL address?</Tooltip.Header>
-                      <p>
-                        Providing a URL can help establish trust with
-                        your application. Following registration, we include
-                        instructions for verifying ownership of your domain.
-                      </p>
-                    </Tooltip.Body>
-                  </Tooltip.Popover>
-                </Tooltip>
-              </LabelRow>
-              <div className={!this.state.validUrl ? 'fieldError' : ''}>
-                <input
-                  type='text'
-                  id='appURL'
-                  placeholder='https://yourapphomepage.com'
-                  value={this.state.appURL}
-                  onChange={this.handleAppURLChange}
-                  onBlur={this.validateAppURL}
-                  ref={r => this.txtAppURL=r} />
-                {validUrl ||
-                  <span className='error'>
-                    <img src={errorIcon} />
-                    Invalid URL
-                  </span>}
-                </div>
-              </Col>
-              <Spacer span={1} />
-              <Spacer span={1} />
-              <Col span={10}>
-                <label htmlFor='appDescription'>
-                  App Description {" "}
-                  <Subtle>(optional)</Subtle>
-                </label>
-                <textarea
-                  rows='4'
-                  cols='50'
-                  placeholder='Describe what your app can do...'
-                  value={this.state.appDescription}
-                  onChange={(e) => { this.handleAppDescriptionChange(e) }} />
-              </Col>
-              <Spacer span={1} />
-              <Spacer span={1} />
-              <Col span={5}>
-                <Grid className='appBranding Grid'>
-                  <Col span={12} className='Grid-cell brandingSettings'>
-                    <h4>App Branding</h4>
-                  </Col>
-                  <Col span={12}>
-                    <div className='colorPicker'>
-                      <label htmlFor='accentColor'>App Accent Color</label>
-                      <input type='text'
-                        id='accentColor'
-                        placeholder='#5C50CA'
-                        value={this.state.accentColor}
-                        onChange={e => this.handleAccentColorChange(e.target.value)} />
-                      <ColorPicker>
-                        <button className='colorPreview' type='button'
-                          style={{backgroundColor: this.state.accentColor}}
-                          onClick={this.toggleColorPicker} />
-
-                        {this.state.colorPicker
-                          ? <ColorPicker.PopOver>
-                              <ChromePicker color={this.state.accentColor}
-                                onChange={this.handleAccentColorChange} />
-                          </ColorPicker.PopOver>
-                          : null}
-
-                      </ColorPicker>
-                    </div>
-                  </Col>
-                  <Col span={12}>
-                    <div className='appImage'>
-                      <label htmlFor='appImage'>App Profile Image</label>
-                      {isUploading
-                        ? <UploadProgress>Uploading Photo ...</UploadProgress>
-                        : <div className='fileUpload'>
-                          <span>Upload Image</span>
-                          <input type='file'
-                            className='upload'
-                            onChange={this.handleAppImageChange} />
-                        </div>
-                      }
-                    </div>
-                  </Col>
-                </Grid>
-              </Col>
-              <Col span={3}>
-                <div className='Grid-cell brandingPreview'>
-                  <div className='appItem'>
-                    <div className='appCover' style={{backgroundColor: this.state.accentColor}}>&nbsp;</div>
-                    <div className={'avatar ' + (this.state.profileImage ? 'uploaded' : 'default')} style={bgImageStyle}>
-                      &nbsp;
-                    </div>
-                    <h3 title={this.state.appName || 'App Name'}>
-                      {this.state.appName
-                        ? this.state.appName.length > 32
-                          ? `${this.state.appName.slice(0, 32)}...`
-                          : this.state.appName
-                        : 'App Name'}
-                    </h3>
-                    <span>{this.props.app.configuration.network}</span>
+                      Invalid URL
+                    </span>}
                   </div>
-                </div>
-              </Col>
-              <Col span={2}>
-                <canvas width='100' height='100' id='canvas' style={{visibility: 'hidden'}} />
-              </Col>
-              <Spacer span={1} />
-            </Grid>
-            {this.state.colorPicker ? <ColorPicker.Cover onClick={ this.hideColorPicker } /> : null}
-            <hr />
-            <CTAButton onClick={this.handleSubmit}
-              className={this.state.appNameValid && this.state.validUrl &&
-                !isUploading && !isBgImageUploading ? '' : 'disabled'}
-              disabled={isUploading || isBgImageUploading}
-            >
-              SAVE CHANGES
-            </CTAButton>
-          </form>
-        </ModalContent>
-      </Content>
-    </Modal>)
+                </Col>
+                <Spacer span={1} />
+                <Spacer span={1} />
+                <Col span={10}>
+                  <label htmlFor='appDescription'>
+                    App Description {" "}
+                    <Subtle>(optional)</Subtle>
+                  </label>
+                  <textarea
+                    rows='4'
+                    cols='50'
+                    placeholder='Describe what your app can do...'
+                    value={this.state.appDescription}
+                    onChange={(e) => { this.handleAppDescriptionChange(e) }} />
+                </Col>
+                <Spacer span={1} />
+                <Spacer span={1} />
+                <Col span={5}>
+                  <Grid className='appBranding Grid'>
+                    <Col span={12} className='Grid-cell brandingSettings'>
+                      <h4>App Branding</h4>
+                    </Col>
+                    <Col span={12}>
+                      <div className='colorPicker'>
+                        <label htmlFor='accentColor'>App Accent Color</label>
+                        <input type='text'
+                          id='accentColor'
+                          placeholder='#5C50CA'
+                          value={this.state.accentColor}
+                          onChange={e => this.handleAccentColorChange(e.target.value)} />
+                        <ColorPicker>
+                          <button className='colorPreview' type='button'
+                            style={{backgroundColor: this.state.accentColor}}
+                            onClick={this.toggleColorPicker} />
+
+                          {this.state.colorPicker
+                            ? <ColorPicker.PopOver>
+                                <ChromePicker color={this.state.accentColor}
+                                  onChange={this.handleAccentColorChange} />
+                            </ColorPicker.PopOver>
+                            : null}
+
+                        </ColorPicker>
+                      </div>
+                    </Col>
+                    <Col span={12}>
+                      <div className='appImage'>
+                        <label htmlFor='appImage'>App Profile Image</label>
+                        {isUploading
+                          ? <UploadProgress>Uploading Photo ...</UploadProgress>
+                          : <div className='fileUpload'>
+                            <span>Upload Image</span>
+                            <input type='file'
+                              className='upload'
+                              onChange={this.handleAppImageChange} />
+                          </div>
+                        }
+                      </div>
+                    </Col>
+                  </Grid>
+                </Col>
+                <Col span={3}>
+                  <div className='Grid-cell brandingPreview'>
+                    <div className='appItem'>
+                      <div className='appCover' style={{backgroundColor: this.state.accentColor}}>&nbsp;</div>
+                      <div className={'avatar ' + (this.state.profileImage ? 'uploaded' : 'default')} style={bgImageStyle}>
+                        &nbsp;
+                      </div>
+                      <h3 title={this.state.appName || 'App Name'}>
+                        {this.state.appName
+                          ? this.state.appName.length > 32
+                            ? `${this.state.appName.slice(0, 32)}...`
+                            : this.state.appName
+                          : 'App Name'}
+                      </h3>
+                      <span>{this.props.app.configuration.network}</span>
+                    </div>
+                  </div>
+                </Col>
+                <Col span={2}>
+                  <canvas width='100' height='100' id='canvas' style={{visibility: 'hidden'}} />
+                </Col>
+                <Spacer span={1} />
+              </Grid>
+              {this.state.colorPicker ? <ColorPicker.Cover onClick={ this.hideColorPicker } /> : null}
+              <hr />
+              <CTAButton onClick={this.handleSubmit}
+                className={this.state.appNameValid && this.state.validUrl &&
+                  !isUploading && !isBgImageUploading ? '' : 'disabled'}
+                disabled={isUploading || isBgImageUploading}
+              >
+                SAVE CHANGES
+              </CTAButton>
+            </form>
+          </ModalContent>
+        </Content>
+      </Modal>
+      <SendVerificationModal
+        show={claim && sendVerificationModal}
+        onClose={this.hideUportVerificationModal}
+        claim={claim} />
+    </React.Fragment>)
   }
 }
 
@@ -583,7 +603,7 @@ const UploadProgress = styled.div`
   text-align: center;
 `
 const Loading = styled.img`
-  animation: ${spin};
+  ${spin}
   margin: 0 0 0 10px;
   width: 24px;
 `

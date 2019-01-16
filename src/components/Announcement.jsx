@@ -51,7 +51,7 @@ class Announcement extends Component {
       })
     }
     return visible && messages.length ? <Container
-        innerRef={r => this.container = r}
+        ref={r => this.container = r}
         expanded={expanded}
         type={messages[messages.length-1].type}
         _height={this.containerHeight}

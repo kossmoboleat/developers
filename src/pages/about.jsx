@@ -1,8 +1,9 @@
 import React from "react"
-import Link from 'gatsby-link'
+import { Link } from 'gatsby'
 import Helmet from "react-helmet"
 import styled from "styled-components"
 
+import Layout from "../components/layout"
 import SEO from "../components/SEO/SEO"
 import config from "../../data/SiteConfig"
 import MainHeader from '../components/Layout/Header'
@@ -14,7 +15,7 @@ const BodyContainer = styled.div`
 
 class AboutPage extends React.Component {
   render() {
-    return (
+    return (<Layout location={this.props.location}>
       <div className="index-container">
         <Helmet title={config.siteTitle} />
         <main>
@@ -29,7 +30,7 @@ class AboutPage extends React.Component {
           </BodyContainer>
         </main>
       </div>
-    );
+    </Layout>);
   }
 }
 

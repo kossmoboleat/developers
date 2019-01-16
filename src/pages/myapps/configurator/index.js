@@ -2,18 +2,20 @@ import React from 'react'
 import Helmet from 'react-helmet'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
-import Link from 'gatsby-link'
+import { graphql, Link } from 'gatsby'
 import { connect } from 'react-redux'
+
 import { addFile } from '../../../utilities/ipfs'
 import { Credentials } from 'uport-credentials'
+import Layout from '../../../components/layout'
 import SiteHeader from '../../../components/Layout/Header'
 import config from '../../../../data/SiteConfig'
 import logo from '../../../images/logo-mark-purple.svg'
 import AppEnvironment from '../../../components/MyApps/Configurator/AppEnvironment'
 import AppDetails from '../../../components/MyApps/Configurator/AppDetails'
 import AppSigningKey from '../../../components/MyApps/Configurator/AppSigningKey'
-import AppRegister from '../../../components/MyApps/Configurator/AppRegister'
 import AppRegComplete from '../../../components/MyApps/Configurator/AppRegComplete'
+import * as actions from '../../../actions'
 import '../../../layouts/css/myapps.css'
 
 class MyAppsConfigurator extends React.Component {
@@ -39,6 +41,10 @@ class MyAppsConfigurator extends React.Component {
     this.nextStep = this.nextStep.bind(this);
     this.previousStep = this.previousStep.bind(this)
   }
+  componentDidMount() {
+    if(!this.props.profile.uportApps)
+      this.props.redirectToMyApps()
+  }
   async getChildState (childName, childState) {
     let childStateObject = {}
     childStateObject[childName] = childState
@@ -59,12 +65,11 @@ class MyAppsConfigurator extends React.Component {
       did: this.state.appDetails.appIdentity.did,
       privateKey: this.state.appDetails.appIdentity.pk
     })
-    credentials.createVerification({sub: this.state.appDetails.appIdentity.did, claim: profileClaim}).then(jwt => {
-      return new Promise(async (resolve, reject) => {
-        const ipfsClaimHash = await this.uploadClaim(jwt)
-        resolve(ipfsClaimHash)
-      })
+    const jwt = await credentials.createVerification({
+      sub: this.state.appDetails.appIdentity.did,
+      claim: profileClaim
     })
+    return await this.uploadClaim(jwt)
   }
   async uploadClaim (profileClaim) {
     const result = await addFile(profileClaim)
@@ -93,7 +98,7 @@ class MyAppsConfigurator extends React.Component {
     this.setState({ pk })
   }
   render () {
-    return (
+    return (<Layout location={this.props.location}>
       <div className='index-container' style={{minHeight: '100vh'}}>
         <Helmet title={config.siteTitle} />
         <main>
@@ -155,13 +160,13 @@ class MyAppsConfigurator extends React.Component {
           </BodyContainer>
         </main>
       </div>
-    );
+    </Layout>);
   }
 }
 
 const BodyContainer = styled.div``
 
-export const pageQuery = graphql`
+export const query = graphql`
 query MyAppsConfiguratorQuery {
     allMarkdownRemark(
       limit: 2000
@@ -213,15 +218,20 @@ MyAppsConfigurator.propTypes = {
   saveProfile: PropTypes.func.isRequired
 }
 
-const mapStateToProps = ({ profile }) => {
-  return { profile }
-}
+const mapStateToProps = ({ profile }) => ({
+  profile
+})
 
-const mapDispatchToProps = dispatch => {
-  return {
-    saveProfile: (profile) => dispatch({ type: `SAVE_PROFILE`, profile: profile }),
-    saveApps: (apps) => dispatch({ type: `SAVE_APPS`, uportApps: apps })
+const mapDispatchToProps = dispatch => ({
+  saveProfile(profile) {
+    dispatch(actions.saveProfile(profile))
+  },
+  saveApps(apps) {
+    dispatch(actions.saveApps(apps))
+  },
+  redirectToMyApps() {
+    dispatch(actions.redirectToMyApps())
   }
-}
+})
 
 export default connect(mapStateToProps, mapDispatchToProps)(MyAppsConfigurator)

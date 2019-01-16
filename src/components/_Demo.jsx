@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 import styled from 'styled-components'
 import {Connect, SimpleSigner} from 'uport-connect'
-import Link from 'gatsby-link'
+import { Link } from 'gatsby'
 import "../layouts/css/demo.css"
 
 const QRCode = require('qrcode.react');

@@ -28,7 +28,7 @@ class AppList extends Component {
   handleAppItemClick (event, index) {
     this.props.clearCurrentApp()
     this.props.setCurrentApp(this.props.profile.uportApps[index], index)
-    this.props.history.push('/myapps/detail')
+    this.props.redirectToAppDetails()
   }
   render () {
     const { uportApps } = this.props.profile

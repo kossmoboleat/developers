@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import styled from 'styled-components'
 import track from '../../../utilities/track'
 import { Container, Grid, Col, large } from '../../../layouts/grid'
-import Link from 'gatsby-link'
+import { Link } from 'gatsby'
 
 class ServerLoginResources extends Component {
   track = (name, properties={}) => () => {

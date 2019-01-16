@@ -1,9 +1,8 @@
 const path = require("path");
 const _ = require("lodash");
-const webpackLodashPlugin = require("lodash-webpack-plugin");
 
-exports.onCreateNode = ({node, boundActionCreators, getNode}) => {
-  const {createNodeField} = boundActionCreators;
+exports.onCreateNode = ({node, actions, getNode}) => {
+  const {createNodeField} = actions;
   let slug;
   if (node.internal.type === "MarkdownRemark") {
     const fileNode = getNode(node.parent);
@@ -53,8 +52,8 @@ exports.onCreateNode = ({node, boundActionCreators, getNode}) => {
   }
 };
 
-exports.createPages = ({graphql, boundActionCreators}) => {
-  const {createPage} = boundActionCreators;
+exports.createPages = ({graphql, actions}) => {
+  const {createPage} = actions;
 
   /* add new types of pages for programatic creation here */
   return new Promise((resolve, reject) => {
@@ -233,19 +232,17 @@ exports.createPages = ({graphql, boundActionCreators}) => {
   });
 };
 
-const generateBabelConfig = require('gatsby/dist/utils/babel-config')
-exports.modifyWebpackConfig = ({ config, stage }) => {
-  if (stage === "build-javascript") {
-    config.plugin("Lodash", webpackLodashPlugin, null);
-  }
+// exports.onCreateWebpackConfig = ({ stage, actions }) => {
+//   switch (stage) {
+//     case `build-javascript`:
+//       actions.setWebpackConfig({
+//         plugins: [],
+//       });
+//   }
+// }
 
-  const program = {
-    directory: __dirname,
-    browserslist: ["> 1%", "last 2 versions", "IE >= 9"],
-  }
-}
-
-exports.modifyBabelrc = ({ babelrc }) => ({
-  ...babelrc,
-  plugins: babelrc.plugins.concat(['transform-regenerator'])
-})
+// exports.onCreateBabelConfig = ({ actions }) => {
+//   actions.setBabelPlugin({
+//     name: '@babel/plugin-transform-regenerator'
+//   })
+// }

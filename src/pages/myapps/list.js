@@ -3,8 +3,10 @@ import Helmet from 'react-helmet'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import Link from 'gatsby-link'
+import { graphql, Link, StaticQuery } from 'gatsby'
+
 import SiteHeader from '../../components/Layout/Header'
+import Layout from "../../components/layout"
 import AppList from '../../components/MyApps/AppList'
 import { Container, Grid, Col, Spacer } from '../../layouts/grid'
 import config from '../../../data/SiteConfig'
@@ -19,11 +21,12 @@ min-height: 100vh;
 class MyAppsAppListPage extends React.Component {
   componentDidMount () {
     if (Object.keys(this.props.profile).length === 0) {
-      this.props.history.push('/myapps/')
+      this.props.redirectToMyApps()
     }
   }
   render () {
-    return (
+    const { redirectToAppDetails } = this.props
+    return (<Layout location={this.props.location}>
       <div className='index-container myAppsWrap appListPage'>
         <Helmet title={config.siteTitle} />
         <Main>
@@ -50,7 +53,7 @@ class MyAppsAppListPage extends React.Component {
               <Col span={10}>
                 <div className='appList'>
                   {this.props.profile.uportApps
-                  ? <AppList history={this.props.history} />
+                  ? <AppList redirectToAppDetails={redirectToAppDetails} />
                   : null
                   }
                 </div>
@@ -60,7 +63,7 @@ class MyAppsAppListPage extends React.Component {
           </Container>
         </Main>
       </div>
-    )
+    </Layout>)
   }
 }
 
@@ -72,7 +75,7 @@ const Main = styled.main`
   padding-bottom: 50px;
 `
 
-export const pageQuery = graphql`
+const query = graphql`
 query AppManagerMyAppsQuery {
     allMarkdownRemark(
       limit: 2000
@@ -121,5 +124,21 @@ MyAppsAppListPage.propTypes = {
 const mapStateToProps = ({ profile }) => {
   return { profile }
 }
+const mapDispatchToProps = dispatch => ({
+  redirectToMyApps() {
+    dispatch({
+      type: 'REDIRECT_MYAPPS'
+    })
+  },
+  redirectToAppDetails() {
+    dispatch({
+      type: 'REDIRECT_APP_DETAILS'
+    })
+  }
+})
 
-export default connect(mapStateToProps)(MyAppsAppListPage)
+const MyAppsAppListPageContainer = connect(mapStateToProps, mapDispatchToProps)(MyAppsAppListPage)
+
+export default (props => <StaticQuery
+  query={query}
+  render={data => <MyAppsAppListPageContainer {...props} data={data} /> } />)

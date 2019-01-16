@@ -1,5 +1,5 @@
 import React from 'react'
-import Link from 'gatsby-link'
+import { Link } from 'gatsby'
 import styled from 'styled-components'
 import _ from 'lodash'
 import { cleanDoubleByteChars } from '../../helpers/cleanDoubleByteChars'
@@ -134,9 +134,9 @@ export default class TableOfContents extends React.Component {
             chapterContents.push(
               <li key={`${node.value}`}>
                 <ContentContainer>
-                  <Link to={`${cat.path}#${heading}`}>
+                  <a href={`${cat.path}#${heading}`}>
                     <h6 className={`${ isActive ? 'active' : ''}`}>{node.value}</h6>
-                  </Link>
+                  </a>
                 </ContentContainer>
               </li>
             )
@@ -162,7 +162,7 @@ export default class TableOfContents extends React.Component {
       )
     })
     return (
-      <TableOfContentsContainer id="toc" innerRef={ref => this.container = ref}>
+      <TableOfContentsContainer id="toc" ref={ref => this.container = ref}>
         <ul>
           {listItems}
         </ul>

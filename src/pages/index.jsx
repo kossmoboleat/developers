@@ -1,7 +1,10 @@
 import React from 'react'
 import Helmet from 'react-helmet'
 import styled from 'styled-components'
-import Link from 'gatsby-link'
+import { Link } from 'gatsby'
+import { graphql, StaticQuery } from 'gatsby'
+
+import Layout from "../components/layout"
 import SEO from '../components/SEO/SEO'
 import SiteHeader from '../components/Layout/Header'
 import SiteFooter from '../components/Layout/Footer'
@@ -40,8 +43,7 @@ class Index extends React.Component {
         )
       })
     }
-
-    return (
+    return (<Layout location={this.props.location}>
       <div className='index-container'>
         <Helmet title={config.siteTitle} />
         <SEO postEdges={postEdges} />
@@ -116,11 +118,9 @@ class Index extends React.Component {
           </FooterContainer>
         </main>
       </div>
-    );
+    </Layout>);
   }
 }
-
-export default Index
 
 const AnnouncementContainer = styled.div`
   text-align: center;
@@ -208,8 +208,7 @@ const FooterContainer = styled.footer`
   clear: all;
 `
 
-/* eslint no-undef: "off"*/
-export const pageQuery = graphql`
+const query = graphql`
   query IndexQuery {
     allMarkdownRemark(
       limit: 2000
@@ -260,4 +259,8 @@ export const pageQuery = graphql`
         }
       }
   }
-`;
+`
+
+export default (props => <StaticQuery
+  query={query}
+  render={data => <Index {...props} data={data} /> } />)

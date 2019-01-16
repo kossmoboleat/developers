@@ -3,36 +3,37 @@ import Helmet from 'react-helmet'
 import styled from 'styled-components'
 import RehypeReact from 'rehype-react'
 import AutoLinkText from 'react-autolink-text2'
+import { graphql, StaticQuery } from 'gatsby'
+
+import Layout from "../components/layout"
 import SEO from '../components/SEO/SEO'
 import SiteHeader from '../components/Layout/Header'
 import DevSurvey from '../components/Survey.jsx'
 import config from '../../data/SiteConfig'
 import TableOfContents from '../components/Layout/TableOfContents'
 import SecondaryTitle from '../components/Layout/html/SecondaryTitle'
+import OrderedList from '../components/Layout/html/OrderedList'
+import UnorderedList from '../components/Layout/html/UnorderedList'
 import CtaButton from '../components/CtaButton'
 import Announcement from '../components/Announcement'
 import PageLink from '../components/Layout/html/PageLink'
 import getHeadings from "../utilities/getHeadings"
-import Link from 'gatsby-link'
 
-export default class ContentTemplate extends React.Component {
+class ContentTemplate extends React.Component {
   getContentWindow = () => this.contentWindow
   render() {
-    const category = this.props.pathContext.category;
-    const { next } = this.props.pathContext;
-    const postEdges = this.props.data.allMarkdownRemark.edges;
+    const { category, next, slug } = this.props.pageContext
+    const postEdges = this.props.data.allMarkdownRemark.edges
 
     const renderAst = new RehypeReact({
       createElement: React.createElement,
       components: {
         h2: SecondaryTitle,
-        a: props => !props.href || props.href.match(/^https?:\/\//)
-          ? <a {...props} />
-          : <Link to={props.href} {...props} />
+        ul: UnorderedList,
+        ol: OrderedList
       }
     }).Compiler
 
-    const { slug } = this.props.pathContext
     const postNode = this.props.data.postBySlug
     const post = postNode.frontmatter
     const type = post.type
@@ -48,8 +49,8 @@ export default class ContentTemplate extends React.Component {
     if (!post.id) {
       post.category_id = config.postDefaultCategoryID
     }
-    return (
-      <div>
+    return (<Layout location={this.props.location}>
+      <React.Fragment>
         <Helmet>
           <title>{`${post.title} | ${config.siteTitle}`}</title>
         </Helmet>
@@ -71,7 +72,7 @@ export default class ContentTemplate extends React.Component {
               getContentWindow={this.getContentWindow}
             />
           </ToCContainer>
-          <BodyContainer innerRef={ref => this.contentWindow = ref}>
+          <BodyContainer ref={ref => this.contentWindow = ref}>
             <Announcement data={this.props.data} />
             <CtaButton to={`${post.source}`}>
               Edit
@@ -86,15 +87,8 @@ export default class ContentTemplate extends React.Component {
               title={next.title} /> : null}
           </BodyContainer>
         </BodyGrid>
-      </div>
-
-      // <div className="category-container">
-      //   <Helmet
-      //     title={`Posts in category "${category}" | ${config.siteTitle}`}
-      //   />
-      //   <PostListing postEdges={postEdges} />
-      // </div>
-    );
+      </React.Fragment>
+    </Layout>);
   }
 }
 
@@ -187,7 +181,7 @@ const ToCContainer = styled.div`
 `
 
 /* eslint no-undef: "off"*/
-export const pageQuery = graphql`
+export const query = graphql`
   query ContentPage($category: String, $slug: String) {
     allMarkdownRemark(
       limit: 1000
@@ -271,4 +265,6 @@ export const pageQuery = graphql`
       }
     }
   }
-`;
+`
+
+export default ContentTemplate

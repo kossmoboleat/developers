@@ -1,18 +1,16 @@
 import React from 'react'
-import { Router } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import createMiddleware from 'redux-saga'
 import 'babel-polyfill'
-import history from './src/utilities/history'
-import configureStore from './src/state/configureStore'
+import configureStore from './src/store/configureStore'
 
 const store = configureStore().store
 
-export const replaceRouterComponent = () => {
-  const ConnectedRouterWrapper = ({ children }) => (
+export const wrapRootElement = ({ element }) => {
+  const ConnectedRootElement = (
     <Provider store={store}>
-      <Router history={history}>{children}</Router>
+      {element}
     </Provider>
   )
-  return ConnectedRouterWrapper
+  return ConnectedRootElement
 }

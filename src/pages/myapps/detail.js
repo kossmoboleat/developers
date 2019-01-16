@@ -3,14 +3,17 @@ import Helmet from 'react-helmet'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import Link from 'gatsby-link'
+import { graphql, Link, StaticQuery } from 'gatsby'
+
 import SiteHeader from '../../components/Layout/Header'
+import Layout from '../../components/layout'
 import { Container, Grid, Col, Spacer, small } from '../../layouts/grid'
 import AppCode from '../../components/MyApps/AppList.Code'
 import Details from '../../components/MyApps/AppList.Details'
 import EditModal from '../../components/MyApps/EditModal'
 import myAppsBg from '../../images/myapps-bg.svg'
 import config from '../../../data/SiteConfig'
+import * as actions from '../../actions'
 import '../../layouts/css/myapps.css'
 
 class AppDetail extends React.Component {
@@ -24,6 +27,9 @@ class AppDetail extends React.Component {
   componentDidMount() {
     if(window.location.search.match(/tab=code/g))
       this.setState({ tab: 'code' })
+    if(!Object.keys(this.props.profile).length) {
+      this.props.history.push('/myapps') // TODO move to redirect saga
+    }
   }
   changeTab = tabId => () => {
     if(this.state.tab != tabId)
@@ -41,8 +47,8 @@ class AppDetail extends React.Component {
       ? {backgroundImage: `url(https://ipfs.io${this.props.currentApp.configuration.profileImage})`}
       : {backgroundImage: `url(${myAppsBg})`})
     const { editModal } = this.state;
-    return (
-      Object.keys(this.props.profile).length
+    return (<Layout location={this.props.location}>
+      {Object.keys(this.props.profile).length
       ? <div className='index-container myAppsWrap startBuilding'>
         <Helmet title={config.siteTitle} />
         <main className={editModal ? 'blurred' : ''}>
@@ -104,8 +110,8 @@ class AppDetail extends React.Component {
           show={editModal}
           onClose={this.hideEditModal} />
       </div>
-      : this.props.history.push('/myapps') // TODO: move to redirect saga
-    )
+      : null}
+    </Layout>)
   }
 }
 
@@ -211,7 +217,7 @@ const Tab = styled.button`
     ` : ''}
 `
 
-export const pageQuery = graphql`
+const query = graphql`
 query AppDetailQuery {
     allMarkdownRemark(
       limit: 2000
@@ -258,15 +264,23 @@ AppDetail.propTypes = {
   currentApp: PropTypes.object.isRequired
 }
 
-const mapStateToProps = ({ profile, currentApp, appIndex }) => {
-  return { profile, currentApp, appIndex }
-}
+const mapStateToProps = ({ profile, currentApp, appIndex }) => ({
+  profile,
+  currentApp,
+  appIndex
+})
 
-const mapDispatchToProps = dispatch => {
-  return {
-    setCurrentApp: (app, index) => dispatch({ type: `SET_CURRENT_APP`, app: app, index: index }),
-    saveApps: (apps) => dispatch({ type: `SAVE_APPS`, uportApps: apps })
+const mapDispatchToProps = dispatch => ({
+  setCurrentApp(app, index) {
+    dispatch(actions.setCurrentApp(app, index))
+  },
+  saveApps(apps) {
+    dispatch(actions.saveApps(apps))
   }
-}
+})
 
-export default connect(mapStateToProps, mapDispatchToProps)(AppDetail)
+const AppDetailContainer = connect(mapStateToProps, mapDispatchToProps)(AppDetail)
+
+export default (props => <StaticQuery
+  query={query}
+  render={data => <AppDetailContainer {...props} data={data} /> } />)

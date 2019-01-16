@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import styled from 'styled-components'
 import { Container, Grid, Col, Spacer, medium } from '../layouts/grid'
 import track from '../utilities/track'
-import Link from 'gatsby-link'
+import { Link } from 'gatsby'
 
 class BuildingBlocks extends Component {
   track = (name) => () => {

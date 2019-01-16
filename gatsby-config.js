@@ -17,6 +17,7 @@ module.exports = {
     }
   },
   plugins: [
+    "gatsby-plugin-lodash",
     "gatsby-plugin-react-helmet",
     {
       resolve: `gatsby-plugin-google-fonts`,
@@ -34,7 +35,7 @@ module.exports = {
       }
     },
     {
-      resolve: `gatsby-plugin-segment-js`,
+      resolve: "gatsby-plugin-segment-js",
       options: {
         // your segment write key for your production environment
         // when process.env.NODE_ENV === 'production'
