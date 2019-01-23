@@ -18,6 +18,7 @@ import CtaButton from '../components/CtaButton'
 import Announcement from '../components/Announcement'
 import PageLink from '../components/Layout/html/PageLink'
 import getHeadings from "../utilities/getHeadings"
+import { small } from '../layouts/grid'
 
 class ContentTemplate extends React.Component {
   getContentWindow = () => this.contentWindow
@@ -96,25 +97,25 @@ const BodyGrid = styled.div`
   height: 100vh;
   display: grid;
   grid-template-rows: 60px 1fr;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: 385px 1fr;
 
-  @media screen and (max-width: 600px) {
-  display: flex;
-  flex-direction: column;
-  height: inherit;
-  }
+  ${small(`
+    display: flex;
+    flex-direction: column;
+    height: inherit;
+  `)}
 `
 
 const BodyContainer = styled.div`
   grid-column: 2 / 3;
   grid-row: 2 / 3;
-  overflow: scroll;
+  overflow: auto;
   justify-self: center;
   width: 100%;
   padding: ${props => props.theme.sitePadding};
-  @media screen and (max-width: 600px) {
+  ${small(`
     order: 2;
-  }
+  `)}
 
   & > div {
     max-width: ${props => props.theme.contentWidthLaptop};
@@ -134,14 +135,14 @@ const BodyContainer = styled.div`
     }
   }
   @media screen and (max-width: 768px) {
-  & > div {
-  max-width: ${props => props.theme.contentWidthLargePhone};
-  }
+    & > div {
+     max-width: ${props => props.theme.contentWidthLargePhone};
+    }
   }
   @media screen and (max-width: 520px) {
-  & > div {
-  max-width: ${props => props.theme.contentWidthLaptop};
-  }
+    & > div {
+      max-width: ${props => props.theme.contentWidthLaptop};
+    }
   }
 `
 
@@ -157,27 +158,12 @@ const HeaderContainer = styled.div`
 const ToCContainer = styled.div`
   grid-column: 1 / 2;
   grid-row: 2 / 3;
-  overflow: scroll;
 
-  ::-webkit-scrollbar-track
-  {
-  background: ${props => props.theme.lightGrey};
-  }
 
-  ::-webkit-scrollbar
-  {
-  width: 2px;
-  }
-
-  ::-webkit-scrollbar-thumb
-  {
-  background: ${props => props.theme.tocAccent};
-  }
-
-  @media screen and (max-width: 600px) {
-  order: 3;
-  overflow: inherit;
-  }
+  ${small(`
+    order: 3;
+    overflow: inherit;
+  `)}
 `
 
 /* eslint no-undef: "off"*/
