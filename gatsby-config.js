@@ -35,6 +35,18 @@ module.exports = {
       }
     },
     {
+      resolve: 'gatsby-source-graphql',
+      options: {
+        typeName: 'GitHub',
+        fieldName: 'github',
+        url: 'https://api.github.com/graphql',
+        headers: {
+          Authorization: `bearer 8cfd7cfeaf8eb725950062f54bd7da5407c086ba`
+        },
+        fetchOptions: {}
+      }
+    },
+    {
       resolve: "gatsby-plugin-segment-js",
       options: {
         // your segment write key for your production environment
