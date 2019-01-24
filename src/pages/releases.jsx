@@ -7,7 +7,7 @@ import SiteFooter from '../components/Layout/Footer'
 import styled from 'styled-components'
 import config from '../../data/SiteConfig'
 import Announcement from '../components/Announcement'
-import TableOfContents from '../components/Layout/TableOfContents'
+import TableOfContentsUI from '../components/Layout/TableOfContentsUI'
 import SecondaryTitle from '../components/Layout/html/SecondaryTitle'
 import OrderedList from '../components/Layout/html/OrderedList'
 import UnorderedList from '../components/Layout/html/UnorderedList'
@@ -19,7 +19,28 @@ import remarkHtml from 'remark-html';
 class ReleasesPage extends React.Component {
   getContentWindow = () => this.contentWindow
   render () {
-    console.log(this.props.data.github)
+    // console.log(this.props.data.github)
+    let innerLinks = []
+    this.props.data.github.nodes.map(repository => (
+      innerLinks.push({
+        headingId: `${repository.name.replace(/\s+/g, '-').toLowerCase()}`,
+        text: repository.name,
+        url: `#${repository.name.replace(/\s+/g, '-').toLowerCase()}`,
+        isPathMatch: false
+      })
+    ))   
+   console.log(this.props.data.github)                                             
+    let listItems = [{
+      headingId: 'releases',
+      text: 'Releases',
+      url: '/releases',
+      isPathMatch: false,
+      innerLinks: innerLinks
+    }]
+    let headings = [
+      {level: 2, id: "uport-connect", isInView: true, hasScrolledPast: false, active: true}
+    ]
+
     return (
       <div className='index-container'>
         <Helmet title={'Releases'} />
@@ -30,17 +51,22 @@ class ReleasesPage extends React.Component {
             />
           </HeaderContainer>
           <ToCContainer>
+            <TableOfContentsUI listItems={listItems} headings={headings} getContentWindow={this.getContentWindow} />
           </ToCContainer>
           <BodyContainer ref={ref => this.contentWindow=ref}>
             <Announcement data={this.props.data.annoucement} />
             <h1>Releases</h1>
             {
             this.props.data.github.nodes.map(repository => (
-              <div>
-                <h3>{repository.name}</h3>
-                <p>{repository.releases.edges[1].node.name}</p>
-                <div dangerouslySetInnerHTML={{__html: remark().use(remarkHtml).processSync(repository.releases.edges[1].node.description).toString()}} />
-              </div>
+              <RepoContainer id={`${repository.name.replace(/\s+/g, '-').toLowerCase()}`} className={'repository'}>
+                <h2 className={'repoName'}>{repository.name}</h2>
+                {repository.releases.edges.map(release => (
+                  <div>
+                    <p>{release.node.name}</p>
+                    <div dangerouslySetInnerHTML={{__html: remark().use(remarkHtml).processSync(release.node.description).toString()}} />
+                  </div>
+                ))}
+              </RepoContainer>
             ))
             }
           </BodyContainer>
@@ -146,6 +172,14 @@ const FooterContainer = styled.footer`
   background-color: #6c59cf;
   clear: all;
 `
+const RepoContainer = styled.div`
+  h1 {
+    font-size: 18px;
+  }
+  h2.repoName {
+    font-size: 26px;
+  }
+`
 
 export const query = graphql`
   query releasesQuery {
@@ -155,7 +189,7 @@ export const query = graphql`
         ... on GitHub_Repository {
           url
           name
-          releases(first: 2) {
+          releases(first: 2, orderBy: {field: CREATED_AT, direction: DESC}) {
             edges {
               node {
                 name
