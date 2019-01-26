@@ -16,26 +16,28 @@ uPort Developer Portal
 |[markdown/did-jwt](git@github.com:uport-project/did-jwt.git)|develop|
 |[markdown/uport-transports](git@github.com:uport-project/uport-transports.git)|develop|
 
+## Requirements
+
+1. Node v10.1.0
+1. NPM v6.0.1
+1. [Vault 1.0.2](https://www.vaultproject.io/downloads.html)
+1. Github Personal Access token set to `read:org` permissions
+1. AWS credentials to push to the appropriate buckets and invalidate CloudFront cache.
+1. Permissions to push to the *master* branch.
+1. Login to vault
+
 ## Get started
 
-Check out the repository and from the root of the project:
+Check out the repository and:
 
 1. `npm install`.
 1. Edit `.gitmodules` or add new markdown sources with `git submodule add`.
 1. Edit `gulp/copy.js` to copy the desired folders to the `/content/public` folder
 1. `npm run setup`
+1. add `export VAULT_ADDR="<dns or ip of vault server>" to your **.bashrc**`
+1. Login to vault `vault login -method=github token=<personal access token from github>`
 1. `npm run dev`
 
-## Requirements
-
-1. Node v10.1.0
-1. NPM v6.0.1
-
-### For deployment
-
-1. Ngrok (for deployment steps)
-1. AWS credentials to push to the appropriate buckets and invalidate CloudFront cache.
-1. Permissions to push to the *master* branch.
 
 There is a known issue with Node 10 and gulp https://github.com/gulpjs/gulp/issues/2162
 
