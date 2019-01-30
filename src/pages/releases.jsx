@@ -2,6 +2,7 @@ import React from 'react'
 import Helmet from 'react-helmet'
 import { graphql } from 'gatsby'
 import SEO from '../components/SEO/SEO'
+import Layout from "../components/layout"
 import SiteHeader from '../components/Layout/Header'
 import SiteFooter from '../components/Layout/Footer'
 import styled from 'styled-components'
@@ -11,6 +12,7 @@ import TableOfContentsUI from '../components/Layout/TableOfContentsUI'
 import SecondaryTitle from '../components/Layout/html/SecondaryTitle'
 import OrderedList from '../components/Layout/html/OrderedList'
 import UnorderedList from '../components/Layout/html/UnorderedList'
+import '../layouts/css/myapps.css'
 
 
 import remark from 'remark';
@@ -19,7 +21,6 @@ import remarkHtml from 'remark-html';
 class ReleasesPage extends React.Component {
   getContentWindow = () => this.contentWindow
   render () {
-    // console.log(this.props.data.github)
     let innerLinks = []
     this.props.data.github.nodes.map(repository => (
       innerLinks.push({
@@ -28,8 +29,7 @@ class ReleasesPage extends React.Component {
         url: `#${repository.name.replace(/\s+/g, '-').toLowerCase()}`,
         isPathMatch: false
       })
-    ))   
-   console.log(this.props.data.github)                                             
+    ))                                               
     let listItems = [{
       headingId: 'releases',
       text: 'Releases',
@@ -40,38 +40,41 @@ class ReleasesPage extends React.Component {
     let headings = [
       {level: 2, id: "uport-connect", isInView: true, hasScrolledPast: false, active: true}
     ]
-
     return (
-      <div className='index-container'>
-        <Helmet title={'Releases'} />
-        <BodyGrid>
-          <HeaderContainer style={{backgroundColor: 'rgb(92, 80, 202)'}}>
-            <SiteHeader
-              location={this.props.location}
-            />
-          </HeaderContainer>
-          <ToCContainer>
-            <TableOfContentsUI listItems={listItems} headings={headings} getContentWindow={this.getContentWindow} />
-          </ToCContainer>
-          <BodyContainer ref={ref => this.contentWindow=ref}>
-            <Announcement data={this.props.data.annoucement} />
-            <h1>Releases</h1>
-            {
-            this.props.data.github.nodes.map(repository => (
-              <RepoContainer id={`${repository.name.replace(/\s+/g, '-').toLowerCase()}`} className={'repository'}>
-                <h2 className={'repoName'}>{repository.name}</h2>
-                {repository.releases.edges.map(release => (
-                  <div>
-                    <p>{release.node.name}</p>
-                    <div dangerouslySetInnerHTML={{__html: remark().use(remarkHtml).processSync(release.node.description).toString()}} />
-                  </div>
-                ))}
-              </RepoContainer>
-            ))
-            }
-          </BodyContainer>
-        </BodyGrid>
-      </div>
+      <Layout location={this.props.location}>
+        <div className='index-container'>
+          <Helmet title={'Releases'} />
+          <BodyGrid>
+            <HeaderContainer style={{backgroundColor: 'rgb(92, 80, 202)'}}>
+              <SiteHeader
+                activeSection={''}
+                location={this.props.location}
+                types={this.props.data.navTypes}
+              />
+            </HeaderContainer>
+            <ToCContainer>
+              <TableOfContentsUI listItems={listItems} headings={headings} getContentWindow={this.getContentWindow} />
+            </ToCContainer>
+            <BodyContainer ref={ref => this.contentWindow=ref}>
+              <Announcement data={this.props.data.annoucement} />
+              <h1>Releases</h1>
+              {
+              this.props.data.github.nodes.map(repository => (
+                <RepoContainer id={`${repository.name.replace(/\s+/g, '-').toLowerCase()}`} className={'repository'}>
+                  <h2 className={'repoName'}>{repository.name}</h2>
+                  {repository.releases.edges.map(release => (
+                    <div>
+                      <p>{release.node.name}</p>
+                      <div dangerouslySetInnerHTML={{__html: remark().use(remarkHtml).processSync(release.node.description).toString()}} />
+                    </div>
+                  ))}
+                </RepoContainer>
+              ))
+              }
+            </BodyContainer>
+          </BodyGrid>
+        </div>
+      </Layout>
     )
   }
 }
@@ -113,6 +116,9 @@ const BodyContainer = styled.div`
   }
   h2 {
     margin-top: 60px;
+  }
+  .repository {
+    margin-left: 0;
   }
   @media screen and (max-width: 1068px) {
     & > div {
@@ -200,6 +206,27 @@ export const query = graphql`
                 }
               }
             }
+          }
+        }
+      }
+    }
+    navTypes:
+    allMarkdownRemark(
+      filter: { frontmatter: { category: { ne: null }, index: { ne: null }}}
+    ) {
+      edges {
+        node {
+          fields {
+            slug
+          }
+          headings {
+            value
+            depth
+          }
+          frontmatter {
+            category
+            type
+            index
           }
         }
       }
