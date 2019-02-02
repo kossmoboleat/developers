@@ -1,5 +1,6 @@
 const path = require("path");
 const _ = require("lodash");
+const repositories = require('./data/repositories')
 
 exports.onCreateNode = ({node, actions, getNode}) => {
   const {createNodeField} = actions;
@@ -57,15 +58,17 @@ exports.createPages = ({graphql, actions}) => {
 
   /* add new types of pages for programatic creation here */
   return new Promise((resolve, reject) => {
-      // const postPage = path.resolve("src/templates/post.jsx");
-      //const tagPage = path.resolve("src/templates/tag.jsx");
     const contentPage = path.resolve("src/templates/content.jsx");
     const overviewPage = path.resolve("src/templates/overview.jsx");
     const categoryPage = path.resolve("src/templates/category.jsx");
+    const releasesPage = path.resolve("src/templates/releases.jsx");
+    const repoIds = Object.keys(repositories).map(function (key) {
+      return repositories[key]
+    })
     resolve(
       graphql(
         `
-        {
+        query ($repos: [ID!]!) {
           allMarkdownRemark {
             edges {
               node {
@@ -83,14 +86,37 @@ exports.createPages = ({graphql, actions}) => {
               }
             }
           }
+          github {
+            nodes(ids: $repos) {
+              id
+              ... on GitHub_Repository {
+                url
+                name
+              }
+            }
+          }
         }
-      `
+      `,
+      {repos: repoIds}
       ).then(result => {
         if (result.errors) {
           /* eslint no-console: "off"*/
           console.log(result.errors);
           reject(result.errors);
         }
+
+        // Create release pages
+        result.data.github.nodes.forEach(repository => {
+          console.log(repository.name)
+          createPage({
+            path: `/releases/${repository.name}`,
+            component: releasesPage,
+            context: {
+              slug: `${repository.name}`,
+              repoId: `${repository.id}`
+            }
+          })
+        })
 
         //const tagSet = new Set();
         const categorySet = new Set();

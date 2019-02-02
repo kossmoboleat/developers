@@ -6,7 +6,7 @@ import Layout from "../components/layout"
 import SiteHeader from '../components/Layout/Header'
 import SiteFooter from '../components/Layout/Footer'
 import styled from 'styled-components'
-import config from '../../data/SiteConfig'
+import repositories from '../../data/repositories'
 import Announcement from '../components/Announcement'
 import TableOfContentsUI from '../components/Layout/TableOfContentsUI'
 import SecondaryTitle from '../components/Layout/html/SecondaryTitle'
@@ -18,7 +18,7 @@ import '../layouts/css/myapps.css'
 import remark from 'remark';
 import remarkHtml from 'remark-html';
 
-class ReleasesPage extends React.Component {
+class ReleasesTemplate extends React.Component {
   getContentWindow = () => this.contentWindow
   render () {
     let innerLinks = []
@@ -56,20 +56,14 @@ class ReleasesPage extends React.Component {
             </ToCContainer>
             <BodyContainer ref={ref => this.contentWindow=ref}>
               <Announcement data={this.props.data.annoucement} />
-              <h1>Releases</h1>
-              {
-              this.props.data.github.nodes.map(repository => (
-                <RepoContainer id={`${repository.name.replace(/\s+/g, '-').toLowerCase()}`} className={'repository'}>
-                  <h2 className={'repoName'}>{repository.name}</h2>
-                  {repository.releases.edges.map(release => (
-                    <div>
-                      <p>{release.node.name}</p>
-                      <div dangerouslySetInnerHTML={{__html: remark().use(remarkHtml).processSync(release.node.description).toString()}} />
-                    </div>
-                  ))}
-                </RepoContainer>
-              ))
-              }
+              <h1>{this.props.data.github.repository.name}</h1>
+              <RepoContainer id={`${this.props.data.github.repository.name.replace(/\s+/g, '-').toLowerCase()}`} className={'repository'}>
+                {this.props.data.github.repository.releases.edges.map(release => (
+                  <div>
+                    <div dangerouslySetInnerHTML={{__html: remark().use(remarkHtml).processSync(release.node.description).toString()}} />
+                  </div>
+                ))}
+              </RepoContainer>
             </BodyContainer>
           </BodyGrid>
         </div>
@@ -187,25 +181,27 @@ const RepoContainer = styled.div`
 `
 
 export const query = graphql`
-  query releasesQuery {
+  query ($slug: String!) {
     github {
-      nodes(ids: ["MDEwOlJlcG9zaXRvcnk4MDU1NzkxOQ==", "MDEwOlJlcG9zaXRvcnk3ODEzNzA3Nw=="]) {
-        id
-        ... on GitHub_Repository {
-          url
-          name
-          releases(first: 2, orderBy: {field: CREATED_AT, direction: DESC}) {
-            edges {
-              node {
+      repository(owner: "uport-project", name: $slug) {
+        name
+        releases(first: 2, orderBy: {field: CREATED_AT, direction: DESC}) {
+          edges {
+            node {
+              name
+              description
+              url
+              tag {
                 name
-                description
-                url
-                tag {
-                  name
-                }
               }
             }
           }
+        }
+      }
+      nodes(ids: ["MDEwOlJlcG9zaXRvcnk4MDU1NzkxOQ==", "MDEwOlJlcG9zaXRvcnk3ODEzNzA3Nw=="]) {
+        ... on GitHub_Repository {
+          url
+          name
         }
       }
     }
@@ -221,7 +217,18 @@ export const query = graphql`
         }
       }
     }
+    allSitePage(filter: {context: {slug: { eq: $slug }}}) {
+      edges {
+        node {
+          path
+          context {
+            slug,
+            repoId
+          }
+        }
+      }
+    }
   }
 `
 
-export default ReleasesPage
+export default ReleasesTemplate
