@@ -26,7 +26,7 @@ function redirectToAppList() {
 }
 
 function redirectToAppConfig() {
-  navigate('/myapps/detail')
+  navigate('/myapps/configurator')
 }
 
 export default function* handleRedirects() {
