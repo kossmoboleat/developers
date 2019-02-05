@@ -53,11 +53,7 @@ class MyApps extends React.Component {
       pushToken: profile.pushToken,
       publicEncKey: profile.boxPub
     })
-    if(this.props.profile.uportApps) {
-      this.props.redirectToAppList()
-    } else {
-      this.props.redirectToAppConfig()
-    }
+    this.props.redirectToAppConfig()
   }
   hideLoginModal = () => {
     this.setState({ loginModal: false })
