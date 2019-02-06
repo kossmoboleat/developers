@@ -40,7 +40,6 @@ class ReleasesTemplate extends React.Component {
     let headings = [
       {level: 2, id: "uport-connect", isInView: true, hasScrolledPast: false, active: true}
     ]
-    console.log(this.props.data)
     return (
       <Layout location={this.props.location}>
         <div className='index-container'>

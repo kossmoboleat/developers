@@ -116,7 +116,6 @@ exports.createPages = ({graphql, actions}) => {
           reject(result.errors);
         }
 
-        console.log(result.data.github.nodes)
         // Releases Page
         createPage({
           path: `/releases`,
