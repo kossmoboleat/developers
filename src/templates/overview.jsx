@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import RehypeReact from 'rehype-react'
 import AutoLinkText from 'react-autolink-text2'
 import { graphql } from 'gatsby'
+import _ from 'lodash'
 
 import Layout from "../components/layout"
 import SEO from '../components/SEO/SEO'
@@ -11,6 +12,7 @@ import SiteHeader from '../components/Layout/Header'
 import DevSurvey from '../components/Survey.jsx'
 import config from '../../data/SiteConfig'
 import TableOfContents from '../components/Layout/TableOfContents'
+import TableOfContentsUI from '../components/Layout/TableOfContentsUI'
 import SecondaryTitle from '../components/Layout/html/SecondaryTitle'
 import OrderedList from '../components/Layout/html/OrderedList'
 import UnorderedList from '../components/Layout/html/UnorderedList'
@@ -18,6 +20,9 @@ import CtaButton from '../components/CtaButton'
 import Announcement from '../components/Announcement'
 import getHeadings from "../utilities/getHeadings"
 import { small } from '../layouts/grid'
+import { cleanDoubleByteChars } from '../helpers/cleanDoubleByteChars'
+
+const fixOverviewPaths = (path='') => path.replace(/^\/overview\/overview$/, '/overview')
 
 class OverviewTemplate extends React.Component {
   getContentWindow = () => this.contentWindow
@@ -34,18 +39,66 @@ class OverviewTemplate extends React.Component {
     const postNode = this.props.data.postBySlug
     const post = postNode.frontmatter
     const type = post.type
-    const types = []
     const messages = []
+    let pathName = ''
 
+    const postNodes = []
     this.props.data.postByCategory.edges.forEach(_type => {
       if (_type.node.frontmatter.type === type) {
-        types.push(_type)
+
+        const postNode = {
+          title: _type.node.frontmatter.title,
+          path: fixOverviewPaths(_type.node.fields.slug),
+          indexNumber: _type.node.frontmatter.index,
+          category: _type.node.frontmatter.category,
+          headings: _type.node.headings
+        }
+        if (postNode.indexNumber || postNode.indexNumber === 0) {
+            postNodes.push(postNode)
+        } else if (post.title == _post.node.frontmatter.title ) {
+          postNodes.push({
+            title: _post.node.frontmatter.title,
+            path: fixOverviewPaths(_post.node.fields.slug),
+            indexNumber: 0,
+            category: _post.node.frontmatter.category,
+            headings: _post.node.headings
+          })
+        }
       }
     })
 
-    const chapterTitles = []
-    types.forEach(_type => {
-      chapterTitles.push(_type.node.frontmatter.title)
+    const listItems = []
+    postNodes.sort((a, b) => a.indexNumber - b.indexNumber).forEach((cat) => {
+      const chapterContents = []
+      if (cat.headings) {
+        cat.headings.forEach(node => {
+          if (node.depth === 2) {
+            const heading = cleanDoubleByteChars(_.kebabCase(node.value))
+            chapterContents.push({
+              headingId: heading,
+              text: node.value,
+              url: `${cat.path}#${heading}`,
+              isPathMatch: cat.path === pathName
+            })
+          }
+        })
+      }
+      listItems.push({
+        headingId: cleanDoubleByteChars(_.kebabCase(cat.title)),
+        text: cat.title.charAt(0).toUpperCase() + cat.title.slice(1),
+        url: cat.path,
+        innerLinks: chapterContents,
+        isPathMatch: cat.path === pathName
+      })
+    })
+
+    // Manually add releases to Overview ToC
+    listItems.push({
+      headingId: 'releases',
+      text: 'Releases',
+      url: '/releases',
+      innerLinks: [],
+      isPathMatch: false
     })
 
     if (!post.id) {
@@ -54,6 +107,9 @@ class OverviewTemplate extends React.Component {
     if (!post.id) {
       post.category_id = config.postDefaultCategoryID
     }
+
+    
+
     return (<Layout location={this.props.location}>
       <React.Fragment>
         <Helmet>
@@ -69,11 +125,10 @@ class OverviewTemplate extends React.Component {
             />
           </HeaderContainer>
           <ToCContainer>
-            <TableOfContents
-              post={post}
-              types={types}
-              headings={getHeadings(postNode.htmlAst)}
-              getContentWindow={this.getContentWindow}
+            <TableOfContentsUI 
+              listItems={listItems} 
+              headings={getHeadings(postNode.htmlAst)} 
+              getContentWindow={this.getContentWindow} 
             />
           </ToCContainer>
           <BodyContainer ref={ref => this.contentWindow=ref}>

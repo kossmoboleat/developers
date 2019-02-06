@@ -23,8 +23,8 @@ module.exports = {
       resolve: `gatsby-plugin-google-fonts`,
       options: {
         fonts: [`nunito sans:200,400,400i,700,700i,800,800i`,
-          `space mono:400,700`
-        ]
+                `space mono:400,700`
+               ]
       }
     },
     {
@@ -32,6 +32,18 @@ module.exports = {
       options: {
         name: "content",
         path: `${__dirname}/content`
+      }
+    },
+    {
+      resolve: 'gatsby-source-graphql',
+      options: {
+        typeName: 'GitHub',
+        fieldName: 'github',
+        url: 'https://api.github.com/graphql',
+        headers: {
+          Authorization: `bearer ${process.env.GRAPHQL_TOKEN}`
+        },
+        fetchOptions: {}
       }
     },
     {

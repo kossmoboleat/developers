@@ -1,5 +1,6 @@
 const path = require("path");
 const _ = require("lodash");
+const repositories = require('./data/repositories')
 
 exports.onCreateNode = ({node, actions, getNode}) => {
   const {createNodeField} = actions;
@@ -57,15 +58,16 @@ exports.createPages = ({graphql, actions}) => {
 
   /* add new types of pages for programatic creation here */
   return new Promise((resolve, reject) => {
-      // const postPage = path.resolve("src/templates/post.jsx");
-      //const tagPage = path.resolve("src/templates/tag.jsx");
     const contentPage = path.resolve("src/templates/content.jsx");
     const overviewPage = path.resolve("src/templates/overview.jsx");
     const categoryPage = path.resolve("src/templates/category.jsx");
+    const releasesPage = path.resolve("src/templates/releases.jsx");
+    const repoIds = Object.keys(repositories).map(function (key) { return repositories[key] })
+    const repoNames = Object.keys(repositories)
     resolve(
       graphql(
         `
-        {
+        query ($repos: [ID!]!) {
           allMarkdownRemark {
             edges {
               node {
@@ -83,14 +85,60 @@ exports.createPages = ({graphql, actions}) => {
               }
             }
           }
+          github {
+            nodes(ids: $repos) {
+              id
+              ... on GitHub_Repository {
+                url
+                name
+                releases(first: 2, orderBy: {field: CREATED_AT, direction: DESC}) {
+                  edges {
+                    node {
+                      name
+                      description
+                      url
+                      tag {
+                        name
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
-      `
+      `,
+      {repos: repoIds}
       ).then(result => {
         if (result.errors) {
           /* eslint no-console: "off"*/
           console.log(result.errors);
           reject(result.errors);
         }
+
+        // Releases Page
+        createPage({
+          path: `/releases`,
+          component: releasesPage,
+          context: {
+            slug: 'releases',
+            repositories: result.data.github.nodes,
+            repoNames: repoNames
+          }
+        })
+
+        // Releases: Indiviual Repositories
+        result.data.github.nodes.forEach(repository => {
+          createPage({
+            path: `/releases/${repository.name}`,
+            component: releasesPage,
+            context: {
+              slug: `${repository.name}`,
+              repositories: [repository],
+              repoNames: repoNames
+            }
+          })
+        })
 
         //const tagSet = new Set();
         const categorySet = new Set();
