@@ -22,11 +22,11 @@ class ReleasesTemplate extends React.Component {
   getContentWindow = () => this.contentWindow
   render () {
     let innerLinks = []
-    this.props.data.github.nodes.map(repository => (
+    this.props.data.allSitePage.edges[0].node.context.repoNames.map(repoName => (
       innerLinks.push({
-        headingId: `${repository.name.replace(/\s+/g, '-').toLowerCase()}`,
-        text: repository.name,
-        url: `/releases/${repository.name.replace(/\s+/g, '-').toLowerCase()}`,
+        headingId: `${repoName.replace(/\s+/g, '-').toLowerCase()}`,
+        text: repoName,
+        url: `/releases/${repoName.replace(/\s+/g, '-').toLowerCase()}`,
         isPathMatch: false
       })
     ))                                               
@@ -40,6 +40,7 @@ class ReleasesTemplate extends React.Component {
     let headings = [
       {level: 2, id: "uport-connect", isInView: true, hasScrolledPast: false, active: true}
     ]
+    console.log(this.props.data)
     return (
       <Layout location={this.props.location}>
         <div className='index-container'>
@@ -56,14 +57,20 @@ class ReleasesTemplate extends React.Component {
             </ToCContainer>
             <BodyContainer ref={ref => this.contentWindow=ref}>
               <Announcement data={this.props.data.annoucement} />
-              <h1>{this.props.data.github.repository.name}</h1>
-              <RepoContainer id={`${this.props.data.github.repository.name.replace(/\s+/g, '-').toLowerCase()}`} className={'repository'}>
-                {this.props.data.github.repository.releases.edges.map(release => (
-                  <div>
-                    <div dangerouslySetInnerHTML={{__html: remark().use(remarkHtml).processSync(release.node.description).toString()}} />
-                  </div>
-                ))}
-              </RepoContainer>
+              {this.props.data.allSitePage.edges[0].node.context.repositories.length > 1 ? <h1>Releases</h1> : null}
+              {
+                this.props.data.allSitePage.edges[0].node.context.repositories.map(repository => (
+                  <RepoContainer id={`${repository.name.replace(/\s+/g, '-').toLowerCase()}`} className={'repository'}>
+                    <h2 className={'repoName'}>{repository.name}</h2>
+                    {repository.releases.edges.map(release => (
+                      <div>
+                        <p>{release.node.name}</p>
+                        <div dangerouslySetInnerHTML={{__html: remark().use(remarkHtml).processSync(release.node.description).toString()}} />
+                      </div>
+                    ))}
+                  </RepoContainer>
+                ))
+              }
             </BodyContainer>
           </BodyGrid>
         </div>
@@ -182,29 +189,6 @@ const RepoContainer = styled.div`
 
 export const query = graphql`
   query ($slug: String!) {
-    github {
-      repository(owner: "uport-project", name: $slug) {
-        name
-        releases(first: 2, orderBy: {field: CREATED_AT, direction: DESC}) {
-          edges {
-            node {
-              name
-              description
-              url
-              tag {
-                name
-              }
-            }
-          }
-        }
-      }
-      nodes(ids: ["MDEwOlJlcG9zaXRvcnk4MDU1NzkxOQ==", "MDEwOlJlcG9zaXRvcnk3ODEzNzA3Nw=="]) {
-        ... on GitHub_Repository {
-          url
-          name
-        }
-      }
-    }
     announcement: 
       allMarkdownRemark(filter: { frontmatter: { announcement: { ne: null } } }) {
       totalCount
@@ -223,7 +207,24 @@ export const query = graphql`
           path
           context {
             slug,
-            repoId
+            repoNames,
+            repositories {
+              id,
+              name,
+              url,
+              releases {
+                edges {
+                  node {
+                    name
+                    description
+                    url
+                    tag {
+                      name
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }

@@ -4,6 +4,8 @@ index: 0
 category: "about"
 type: "overview"
 source: "https://github.com/uport-project/uport-project.github.io/blob/develop/markdown/docs/overview/overview.md"
+announcement: "Announcing EIP-712 support! See our mobile and library release notes https://developer.uport.me/releases for details."
+announcementType: "positive"
 ---
 
 ## Helping You Build User Centric Apps on Blockchains

@@ -62,9 +62,8 @@ exports.createPages = ({graphql, actions}) => {
     const overviewPage = path.resolve("src/templates/overview.jsx");
     const categoryPage = path.resolve("src/templates/category.jsx");
     const releasesPage = path.resolve("src/templates/releases.jsx");
-    const repoIds = Object.keys(repositories).map(function (key) {
-      return repositories[key]
-    })
+    const repoIds = Object.keys(repositories).map(function (key) { return repositories[key] })
+    const repoNames = Object.keys(repositories)
     resolve(
       graphql(
         `
@@ -92,6 +91,18 @@ exports.createPages = ({graphql, actions}) => {
               ... on GitHub_Repository {
                 url
                 name
+                releases(first: 2, orderBy: {field: CREATED_AT, direction: DESC}) {
+                  edges {
+                    node {
+                      name
+                      description
+                      url
+                      tag {
+                        name
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -105,15 +116,27 @@ exports.createPages = ({graphql, actions}) => {
           reject(result.errors);
         }
 
-        // Create release pages
+        console.log(result.data.github.nodes)
+        // Releases Page
+        createPage({
+          path: `/releases`,
+          component: releasesPage,
+          context: {
+            slug: 'releases',
+            repositories: result.data.github.nodes,
+            repoNames: repoNames
+          }
+        })
+
+        // Releases: Indiviual Repositories
         result.data.github.nodes.forEach(repository => {
-          console.log(repository.name)
           createPage({
             path: `/releases/${repository.name}`,
             component: releasesPage,
             context: {
               slug: `${repository.name}`,
-              repoId: `${repository.id}`
+              repositories: [repository],
+              repoNames: repoNames
             }
           })
         })
