@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { Link } from 'gatsby'
 import styled from 'styled-components'
 
-import { medium } from '../../layouts/grid'
+import { Grid, Col, small } from '../../layouts/grid'
 
 export default class TableOfContentsUI extends React.Component {
   constructor(props) {
@@ -22,8 +22,9 @@ export default class TableOfContentsUI extends React.Component {
   }
   highlightActiveLink = () => {
     const contentWindow = this.props.getContentWindow()
-    if(!contentWindow)
+    if(!contentWindow) {
       return
+    }
     let headings = this.props.headings.map(h => ({
       ...h,
       id: h.id && h.id
@@ -88,11 +89,10 @@ export default class TableOfContentsUI extends React.Component {
   render () {
     const { listItems } = this.props
     const { activeHeadings } = this.state
-
+    const title = listItems[0].text
     const links = listItems.map(li => {
       const innerLinks = li.innerLinks.map(cc => {
-        const isActive = Boolean(activeHeadings.find(hId => hId == cc.headingId)) &&
-          cc.isPathMatch
+        const isActive = Boolean(activeHeadings.find(hId => hId == cc.headingId))
         return (<li key={cc.text}>
           <ContentContainer>
             <a href={cc.url}>
@@ -103,8 +103,7 @@ export default class TableOfContentsUI extends React.Component {
       })
 
       const isActive = activeHeadings
-        .find(hId => hId === li.headingId ) ||
-        li.isPathMatch
+        .find(hId => hId === li.headingId ) || li.isPathMatch
 
       return (<li key={`${li.url}`}>
         <Link to={`${li.url}`}>
@@ -114,13 +113,14 @@ export default class TableOfContentsUI extends React.Component {
             </h5>
           </span>
         </Link>
-        <ul className='chapterItems'>
+        {innerLinks.length ? <ul className='chapterItems'>
           {innerLinks}
-        </ul>
+        </ul> : null}
       </li>)
     })
 
     return (<TableOfContentsContainer id="toc" ref={ref => this.container = ref}>
+      <Title>{title}</Title>
       <Scrollpane>
         <ul>
           {links}
@@ -130,6 +130,11 @@ export default class TableOfContentsUI extends React.Component {
   }
 }
 TableOfContentsUI.propTypes = {
+  getContentWindow: PropTypes.func.isRequired,
+  headings: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    level: PropTypes.number.isRequired
+  })).isRequired,
   listItems: PropTypes.arrayOf(PropTypes.shape({
     headingId: PropTypes.string.isRequired,
     text: PropTypes.string.isRequired,
@@ -141,13 +146,12 @@ TableOfContentsUI.propTypes = {
       url: PropTypes.string.isRequired,
       isPathMatch: PropTypes.bool.isRequired
     }))
-  }))
+  })).isRequired
 }
 
 const TableOfContentsContainer = styled.div`
-  display: none;
-  padding: 40px 25px;
-
+  padding: 40px 0;
+  position: fixed;
   ul {
     list-style: none;
     margin: 0;
@@ -163,13 +167,11 @@ const TableOfContentsContainer = styled.div`
       list-style: none;
     }
     li:first-child .tocHeading {
-      background: none;
-      color: #5C50CA;
-      font-size: 20px;
-      font-weight: 800;
-      margin-top: 0;
-      padding-left: 20px;
+      display: none;
     }
+    // li:nth-child(2) h5 {
+    //   margin-top: 0;
+    // }
   }
   .chapterItems {
     list-style: none;
@@ -217,19 +219,33 @@ const TableOfContentsContainer = styled.div`
     font-size: 14px;
   }
 
-  ${medium('display: block;')}
+  ${small('display: none;')}
+`
+const Title = styled.div`
+  background-color: #F2F3F9;
+  border-radius: 4px 4px 0 0;
+  color: #5C50CA;
+  font-size: 20px;
+  font-weight: 800;
+  max-width: 320px;
+  padding: 30px 20px 10px 40px;
+  width: 21vw;
 `
 const Scrollpane = styled.div`
   background-color: #F2F3F9;
-  border-radius: 4px;
+  border: solid 4px #F2F3F9;
+  border-radius: 0 0 4px 4px;
   height: 70vh;
+  max-width: 320px;
   overflow-x: hidden;
   overflow-y: auto;
-  padding: 30px 20px;
-  ::-webkit-scrollbar-track
-  {
-    background: ${props => props.theme.lightGrey};
-  }
+  padding: 10px 20px 30px;
+  width: 21vw;
+
+  // ::-webkit-scrollbar-track
+  // {
+  //   background: ${props => props.theme.lightGrey};
+  // }
   ::-webkit-scrollbar
   {
     width: 2px;

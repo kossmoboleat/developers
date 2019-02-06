@@ -1,6 +1,9 @@
 import React from 'react'
 import Helmet from 'react-helmet'
 import { graphql } from 'gatsby'
+import remark from 'remark'
+import remarkHtml from 'remark-html'
+
 import SEO from '../components/SEO/SEO'
 import Layout from "../components/layout"
 import SiteHeader from '../components/Layout/Header'
@@ -12,11 +15,9 @@ import TableOfContentsUI from '../components/Layout/TableOfContentsUI'
 import SecondaryTitle from '../components/Layout/html/SecondaryTitle'
 import OrderedList from '../components/Layout/html/OrderedList'
 import UnorderedList from '../components/Layout/html/UnorderedList'
+import { Container, Grid, Col, Spacer, small } from '../layouts/grid'
 import '../layouts/css/myapps.css'
 
-
-import remark from 'remark';
-import remarkHtml from 'remark-html';
 
 class ReleasesTemplate extends React.Component {
   getContentWindow = () => this.contentWindow
@@ -29,7 +30,7 @@ class ReleasesTemplate extends React.Component {
         url: `/releases/${repoName.replace(/\s+/g, '-').toLowerCase()}`,
         isPathMatch: false
       })
-    ))                                               
+    ))
     let listItems = [{
       headingId: 'releases',
       text: 'Releases',
@@ -37,9 +38,13 @@ class ReleasesTemplate extends React.Component {
       isPathMatch: false,
       innerLinks: innerLinks
     }]
-    let headings = [
-      {level: 2, id: "uport-connect", isInView: true, hasScrolledPast: false, active: true}
-    ]
+    let headings = [{
+      level: 2,
+      id: "u-port-connect",
+      isInView: true,
+      hasScrolledPast: false,
+      active: true
+    }]
     return (
       <Layout location={this.props.location}>
         <div className='index-container'>
@@ -51,25 +56,33 @@ class ReleasesTemplate extends React.Component {
                 location={this.props.location}
               />
             </HeaderContainer>
-            <ToCContainer>
-              <TableOfContentsUI listItems={listItems} headings={headings} getContentWindow={this.getContentWindow} />
-            </ToCContainer>
             <BodyContainer ref={ref => this.contentWindow=ref}>
-              <Announcement data={this.props.data.annoucement} />
-              {this.props.data.allSitePage.edges[0].node.context.repositories.length > 1 ? <h1>Releases</h1> : null}
-              {
-                this.props.data.allSitePage.edges[0].node.context.repositories.map(repository => (
-                  <RepoContainer id={`${repository.name.replace(/\s+/g, '-').toLowerCase()}`} className={'repository'}>
-                    <h2 className={'repoName'}>{repository.name}</h2>
-                    {repository.releases.edges.map(release => (
-                      <div>
-                        <p>{release.node.name}</p>
-                        <div dangerouslySetInnerHTML={{__html: remark().use(remarkHtml).processSync(release.node.description).toString()}} />
-                      </div>
-                    ))}
-                  </RepoContainer>
-                ))
-              }
+              <Container>
+                <Grid>
+                  <ToCContainer>
+                    <TableOfContentsUI
+                      listItems={listItems}
+                      headings={headings}
+                      getContentWindow={this.getContentWindow} />
+                  </ToCContainer>
+                  <Spacer span={1} />
+                  <Col span={7}>
+                    <Announcement data={this.props.data.annoucement} />
+                    {this.props.data.allSitePage.edges[0].node.context.repositories.length > 1 ? <h1>Releases</h1> : null}
+                    {this.props.data.allSitePage.edges[0].node.context.repositories.map(repository => {
+                      let repoId = `${repository.name.replace(/\s+/g, '-').toLowerCase()}`;
+                      repoId = repoId.replace('uport-', 'u-port-')
+                      return (<RepoContainer key={repoId} className='repository'>
+                        <h2 id={repoId} className='repoName'>{repository.name}</h2>
+                        {repository.releases.edges.map(release => (<div key={release.node.name}>
+                          <p>{release.node.name}</p>
+                          <div dangerouslySetInnerHTML={{__html: remark().use(remarkHtml).processSync(release.node.description).toString()}} />
+                        </div>))}
+                      </RepoContainer>)
+                    })}
+                  </Col>
+                </Grid>
+              </Container>
             </BodyContainer>
           </BodyGrid>
         </div>
@@ -82,33 +95,22 @@ const BodyGrid = styled.div`
   height: 100vh;
   display: grid;
   grid-template-rows: 60px 1fr;
-  grid-template-columns: 300px 1fr;
 
-  @media screen and (max-width: 600px) {
+  ${small(`
     display: flex;
     flex-direction: column;
     height: inherit;
-  }
+  `)}
 `
 
 const BodyContainer = styled.div`
-  grid-column: 2 / 3;
-  grid-row: 2 / 3;
-  overflow: scroll;
+  overflow-y: auto;
+  overflow-x: hidden;
   justify-self: center;
-  width: 100%;
   padding: ${props => props.theme.sitePadding};
-  @media screen and (max-width: 600px) {
-    order: 2;
-  }
-
-  & > div {
-    max-width: ${props => props.theme.contentWidthLaptop};
-    margin-left: ${props => props.theme.bobbysLeftMarginPreference};
-    margin-top: auto;
-    margin-right: auto;
-    margin-bottom: auto;
-  }
+  padding-left: 0;
+  padding-right: 0;
+  width: 100%;
 
   & > h1 {
     color: ${props => props.theme.accentDark};
@@ -116,24 +118,8 @@ const BodyContainer = styled.div`
   h2 {
     margin-top: 60px;
   }
-  .repository {
-    margin-left: 0;
-  }
-  @media screen and (max-width: 1068px) {
-    & > div {
-      max-width: ${props => props.theme.contentWidthTablet};
-      margin-left: ${props => props.theme.gregsLeftMarginPreference};
-    }
-  }
-  @media screen and (max-width: 768px) {
-    & > div {
-      max-width: ${props => props.theme.contentWidthLargePhone};
-    }
-  }
-  @media screen and (max-width: 520px) {
-    & > div {
-      max-width: ${props => props.theme.contentWidthLaptop};
-    }
+  code {
+    // white-space: normal;
   }
 `
 
@@ -147,26 +133,8 @@ const HeaderContainer = styled.div`
 `
 
 const ToCContainer = styled.div`
-  grid-column: 1 / 2;
-  grid-row: 2 / 3;
-  overflow: scroll;
-
-  ::-webkit-scrollbar-track
-  {
-    background: ${props => props.theme.lightGrey};
-  }
-  ::-webkit-scrollbar
-  {
-    width: 2px;
-  }
-  ::-webkit-scrollbar-thumb
-  {
-    background: ${props => props.theme.tocAccent};
-  }
-  @media screen and (max-width: 600px) {
-    order: 3;
-    overflow: inherit;
-  }
+  grid-area: 1 / 1 / 2 / 4;
+  ${small('display: none;')}
 `
 
 const IndexHeadContainer = styled.div`
@@ -188,7 +156,7 @@ const RepoContainer = styled.div`
 
 export const query = graphql`
   query ($slug: String!) {
-    announcement: 
+    announcement:
       allMarkdownRemark(filter: { frontmatter: { announcement: { ne: null } } }) {
       totalCount
       edges {

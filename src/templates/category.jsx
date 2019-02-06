@@ -18,7 +18,7 @@ import UnorderedList from '../components/Layout/html/UnorderedList'
 import CtaButton from '../components/CtaButton'
 import Announcement from '../components/Announcement'
 import getHeadings from '../utilities/getHeadings'
-import { small } from '../layouts/grid'
+import { Container, Grid, Col, Spacer, small } from '../layouts/grid'
 
 class CategoryTemplate extends React.Component {
   getContentWindow = () => this.contentWindow
@@ -76,23 +76,33 @@ class CategoryTemplate extends React.Component {
               types={this.props.navTypes}
             />
           </HeaderContainer>
-          <ToCContainer>
-            <TableOfContents
-              types={types}
-              post={post}
-              headings={getHeadings(postNode.htmlAst)}
-              getContentWindow={this.getContentWindow}
-            />
-          </ToCContainer>
           <BodyContainer ref={ref => this.contentWindow=ref}>
-            <Announcement data={this.props.data} />
-            <CtaButton to={`${post.source}`}>
-              Edit
-            </CtaButton>
-            <div className={`docSearch-content`}>
-              { renderAst(postNode.htmlAst) }
-            </div>
-            <DevSurvey />
+            <Container>
+              <Grid>
+                <ToCContainer>
+                  <TableOfContents
+                    types={types}
+                    post={post}
+                    headings={getHeadings(postNode.htmlAst)}
+                    getContentWindow={this.getContentWindow}
+                  />
+                </ToCContainer>
+                <Spacer span={1} />
+                <Col span={7}>
+                  <Announcement data={this.props.data} />
+                  <CtaButton to={`${post.source}`}>
+                    Edit
+                  </CtaButton>
+                  <div className={`docSearch-content`}>
+                    { renderAst(postNode.htmlAst) }
+                  </div>
+                </Col>
+                <Spacer span={4} />
+                <Col span={8}>
+                  <DevSurvey />
+                </Col>
+              </Grid>
+            </Container>
           </BodyContainer>
         </BodyGrid>
       </React.Fragment>
@@ -104,7 +114,6 @@ const BodyGrid = styled.div`
   height: 100vh;
   display: grid;
   grid-template-rows: 60px 1fr;
-  grid-template-columns: 385px 1fr;
 
   ${small(`
     display: flex;
@@ -112,64 +121,36 @@ const BodyGrid = styled.div`
     height: inherit;
   `)}
 `
-
 const BodyContainer = styled.div`
-  grid-column: 2 / 3;
-  grid-row: 2 / 3;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   justify-self: center;
-  width: 100%;
   padding: ${props => props.theme.sitePadding};
-  ${small(`
-    order: 2;
-  `)}
-
-  & > div {
-  max-width: ${props => props.theme.contentWidthLaptop};
-  margin-left: ${props => props.theme.bobbysLeftMarginPreference};
-  margin-top: auto;
-  margin-right: auto;
-  margin-bottom: auto;
-  }
+  padding-left: 0;
+  padding-right: 0;
+  width: 100%;
 
   & > h1 {
-  color: ${props => props.theme.accentDark};
+    color: ${props => props.theme.accentDark};
   }
-  @media screen and (max-width: 1068px) {
-  & > div {
-  max-width: ${props => props.theme.contentWidthTablet};
-  margin-left: ${props => props.theme.gregsLeftMarginPreference};
+  h2 {
+    margin-top: 60px;
   }
-  }
-  @media screen and (max-width: 768px) {
-  & > div {
-  max-width: ${props => props.theme.contentWidthLargePhone};
-  }
-  }
-  @media screen and (max-width: 520px) {
-  & > div {
-  max-width: ${props => props.theme.contentWidthLaptop};
-  }
+  code {
+    // white-space: normal;
   }
 `
-
 const HeaderContainer = styled.div`
   background: ${props => props.theme.brand};
   width: 100vw;
   .Grid {
-  width: 90vw;
-  margin: 0 auto;
+    width: 90vw;
+    margin: 0 auto;
   }
 `
-
 const ToCContainer = styled.div`
-  grid-column: 1 / 2;
-  grid-row: 2 / 3;
-
-  ${small(`
-    order: 3;
-    overflow: inherit;
-  `)}
+  grid-area: 1 / 1 / 2 / 4;
+  ${small('display: none;')}
 `
 
 const query = graphql`

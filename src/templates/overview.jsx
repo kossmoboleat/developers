@@ -19,7 +19,7 @@ import UnorderedList from '../components/Layout/html/UnorderedList'
 import CtaButton from '../components/CtaButton'
 import Announcement from '../components/Announcement'
 import getHeadings from "../utilities/getHeadings"
-import { small } from '../layouts/grid'
+import { Container, Grid, Col, Spacer, small } from '../layouts/grid'
 import { cleanDoubleByteChars } from '../helpers/cleanDoubleByteChars'
 
 const fixOverviewPaths = (path='') => path.replace(/^\/overview\/overview$/, '/overview')
@@ -83,13 +83,16 @@ class OverviewTemplate extends React.Component {
           }
         })
       }
-      listItems.push({
-        headingId: cleanDoubleByteChars(_.kebabCase(cat.title)),
-        text: cat.title.charAt(0).toUpperCase() + cat.title.slice(1),
-        url: cat.path,
-        innerLinks: chapterContents,
-        isPathMatch: cat.path === pathName
-      })
+      const headingId = cleanDoubleByteChars(_.kebabCase(cat.title));
+      if(headingId !== "releases") {
+        listItems.push({
+          headingId,
+          text: cat.title.charAt(0).toUpperCase() + cat.title.slice(1),
+          url: cat.path,
+          innerLinks: chapterContents,
+          isPathMatch: cat.path === pathName
+        })
+      }
     })
 
     // Manually add releases to Overview ToC
@@ -108,8 +111,6 @@ class OverviewTemplate extends React.Component {
       post.category_id = config.postDefaultCategoryID
     }
 
-    
-
     return (<Layout location={this.props.location}>
       <React.Fragment>
         <Helmet>
@@ -124,22 +125,32 @@ class OverviewTemplate extends React.Component {
               types={this.props.navTypes}
             />
           </HeaderContainer>
-          <ToCContainer>
-            <TableOfContentsUI 
-              listItems={listItems} 
-              headings={getHeadings(postNode.htmlAst)} 
-              getContentWindow={this.getContentWindow} 
-            />
-          </ToCContainer>
           <BodyContainer ref={ref => this.contentWindow=ref}>
-            <Announcement data={this.props.data} />
-            <CtaButton to={`${post.source}`}>
-              Edit
-            </CtaButton>
-            <div className={`docSearch-content`}>
-              { renderAst(postNode.htmlAst) }
-            </div>
-            <DevSurvey />
+            <Container>
+              <Grid>
+                <ToCContainer>
+                  <TableOfContentsUI
+                    listItems={listItems}
+                    headings={getHeadings(postNode.htmlAst)}
+                    getContentWindow={this.getContentWindow}
+                  />
+                </ToCContainer>
+                <Spacer span={1} />
+                <Col span={7}>
+                  <Announcement data={this.props.data} />
+                  <CtaButton to={`${post.source}`}>
+                    Edit
+                  </CtaButton>
+                  <div className={`docSearch-content`}>
+                    { renderAst(postNode.htmlAst) }
+                  </div>
+                </Col>
+                <Spacer span={4} />
+                <Col span={8}>
+                  <DevSurvey />
+                </Col>
+              </Grid>
+            </Container>
           </BodyContainer>
         </BodyGrid>
       </React.Fragment>
@@ -151,7 +162,6 @@ const BodyGrid = styled.div`
   height: 100vh;
   display: grid;
   grid-template-rows: 60px 1fr;
-  grid-template-columns: 385px 1fr;
 
   ${small(`
     display: flex;
@@ -159,25 +169,13 @@ const BodyGrid = styled.div`
     height: inherit;
   `)}
 `
-
 const BodyContainer = styled.div`
-  grid-column: 2 / 3;
-  grid-row: 2 / 3;
   overflow: auto;
   justify-self: center;
-  width: 100%;
   padding: ${props => props.theme.sitePadding};
-  ${small(`
-    order: 2;
-  `)}
-
-  & > div {
-    max-width: ${props => props.theme.contentWidthLaptop};
-    margin-left: ${props => props.theme.bobbysLeftMarginPreference};
-    margin-top: auto;
-    margin-right: auto;
-    margin-bottom: auto;
-  }
+  padding-left: 0;
+  padding-right: 0;
+  width: 100%;
 
   & > h1 {
     color: ${props => props.theme.accentDark};
@@ -185,24 +183,10 @@ const BodyContainer = styled.div`
   h2 {
     margin-top: 60px;
   }
-  @media screen and (max-width: 1068px) {
-    & > div {
-      max-width: ${props => props.theme.contentWidthTablet};
-      margin-left: ${props => props.theme.gregsLeftMarginPreference};
-    }
-  }
-  @media screen and (max-width: 768px) {
-    & > div {
-      max-width: ${props => props.theme.contentWidthLargePhone};
-    }
-  }
-  @media screen and (max-width: 520px) {
-    & > div {
-      max-width: ${props => props.theme.contentWidthLaptop};
-    }
+  code {
+    // white-space: normal;
   }
 `
-
 const HeaderContainer = styled.div`
   background: ${props => props.theme.brand};
   width: 100vw;
@@ -211,15 +195,9 @@ const HeaderContainer = styled.div`
     margin: 0 auto;
   }
 `
-
 const ToCContainer = styled.div`
-  grid-column: 1 / 2;
-  grid-row: 2 / 3;
-
-  ${small(`
-    order: 3;
-    overflow: inherit;
-  `)}
+  grid-area: 1 / 1 / 2 / 4;
+  ${small('display: none;')}
 `
 
 export const query = graphql`
