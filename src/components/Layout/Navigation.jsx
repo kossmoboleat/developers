@@ -33,7 +33,7 @@ class Navigation extends React.Component {
             activeClassName='active'
             onClick={this.track('Platform Clicked')}
           > Platform </StyledLink>
-          <a href='https://chat.uport.me'
+          <a href='https://uport.zendesk.com/hc/en-us'
             className={`nav-link w-nav-link`}
             target='_blank'
             onClick={this.track('Help Opened')}
@@ -64,7 +64,7 @@ class Navigation extends React.Component {
               activeClassName='active'
               onClick={this.track('Platform Clicked', { mobile: true })}
             > Platform </StyledLink>
-            <a href='https://chat.uport.me'
+            <a href='https://uport.zendesk.com/hc/en-us'
               className={`menu-item`}
               target='_blank'
               onClick={this.track('Help Opened', { mobile: true })}
