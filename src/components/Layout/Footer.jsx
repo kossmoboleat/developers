@@ -50,7 +50,7 @@ class Footer extends React.Component {
         </div>
         <div className={'Grid Grid--gutters button-wrap'}>
           <div className='Grid-cell'>
-            <a href='https://chat.uport.me/' onClick={this.track('Join The Community Clicked')}>
+            <a href='https://uport.zendesk.com/hc/en-us' onClick={this.track('Join The Community Clicked')}>
               <button>Join The Community</button>
             </a>
           </div>

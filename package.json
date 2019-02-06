@@ -155,6 +155,8 @@
     "lint:md": "remark content/public/",
     "write-good": "write-good $(glob 'content/public/**/*.md')",
     "format:js": "prettier '**/*.{js,jsx}' --write",
+    "draft-release-notes": "GREN_GITHUB_TOKEN=$(vault read -field=value secret/mobile/release_token) gren release -d -l 1",
+    "publish-release-notes": "GREN_GITHUB_TOKEN=$(vault read -field=value secret/mobile/release_token) gren release -l 1",
     "test": "jest"
   },
   "remarkConfig": {
