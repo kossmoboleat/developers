@@ -141,9 +141,13 @@ class OverviewTemplate extends React.Component {
                   <CtaButton to={`${post.source}`}>
                     Edit
                   </CtaButton>
-                  <div className={`docSearch-content`}>
-                    { renderAst(postNode.htmlAst) }
-                  </div>
+                  <Grid style={{width: "100%"}}>
+                    <Col span={12} style={{width: "100%"}}>
+                    <div className={`docSearch-content`}>
+                      { renderAst(postNode.htmlAst) }
+                    </div>
+                    </Col>
+                  </Grid>
                 </Col>
                 <Spacer span={4} />
                 <Col span={8}>

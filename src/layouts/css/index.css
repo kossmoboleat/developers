@@ -466,9 +466,11 @@ footer .footer-menu-wrap a {
 .docSearch-content tr td:first-child, .docSearch-content tr th:first-child  {
   padding-left: 20px;
 }
-.docSearch-content table code {
-  overflow-wrap: break-word;
+.docSearch-content table code,
+.docSearch-content code[class*="language-"],
+.docSearch-content pre[class*="language-"] {
   white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 /* Login Status */
