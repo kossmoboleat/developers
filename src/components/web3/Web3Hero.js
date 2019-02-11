@@ -27,7 +27,7 @@ class Web3Hero extends React.Component {
               </p>
               <div className={'hero-features'}>
                 <div className=''>
-                  <Link to='#web3-solutions' className='hero-button' onClick={this.track('Web3 Solutions Clicked')}>
+                  <Link to='/web3#web3-solutions' className='hero-button' onClick={this.track('Web3 Solutions Clicked')}>
                     GET STARTED
                   </Link>
                 </div>
