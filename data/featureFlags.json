@@ -1,9 +1,9 @@
 {
   "production": {
-    "headerSearch": true
+    "headerSearch": false
   },
   "stage": {
-    "headerSearch": true
+    "headerSearch": false
   },
   "development": {
     "headerSearch": false

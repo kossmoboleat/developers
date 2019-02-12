@@ -48,12 +48,14 @@ const SearchWrap = styled.form`
 
 class Search extends Component {
   componentDidMount () {
-    window.docsearch({
-      apiKey: '64662e7ea02368c0980f941c85d28814',
-      indexName: 'uport',
-      inputSelector: '#searchInput',
-      debug: false // Set debug to true if you want to inspect the dropdown
-    })
+    if(window && typeof(window.docsearch) === "function") {
+      window.docsearch({
+        apiKey: '64662e7ea02368c0980f941c85d28814',
+        indexName: 'uport',
+        inputSelector: '#searchInput',
+        debug: false // Set debug to true if you want to inspect the dropdown
+      })
+    }
   }
   render () {
     return (
