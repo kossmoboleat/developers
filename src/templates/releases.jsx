@@ -3,6 +3,7 @@ import Helmet from 'react-helmet'
 import { graphql } from 'gatsby'
 import remark from 'remark'
 import remarkHtml from 'remark-html'
+import tick from '../images/greenTick.svg'
 
 import SEO from '../components/SEO/SEO'
 import Layout from "../components/layout"
@@ -12,9 +13,6 @@ import styled from 'styled-components'
 import repositories from '../../data/repositories'
 import Announcement from '../components/Announcement'
 import TableOfContentsUI from '../components/Layout/TableOfContentsUI'
-import SecondaryTitle from '../components/Layout/html/SecondaryTitle'
-import OrderedList from '../components/Layout/html/OrderedList'
-import UnorderedList from '../components/Layout/html/UnorderedList'
 import { Container, Grid, Col, Spacer, small } from '../layouts/grid'
 import '../layouts/css/myapps.css'
 
@@ -22,29 +20,35 @@ import '../layouts/css/myapps.css'
 class ReleasesTemplate extends React.Component {
   getContentWindow = () => this.contentWindow
   render () {
-    let innerLinks = []
-    this.props.data.allSitePage.edges[0].node.context.repoNames.map(repoName => (
-      innerLinks.push({
-        headingId: `${repoName.replace(/\s+/g, '-').toLowerCase()}`,
-        text: repoName,
-        url: `/releases/${repoName.replace(/\s+/g, '-').toLowerCase()}`,
-        isPathMatch: false
-      })
-    ))
+    let headings = [{id: 'releases', level: 1}]
     let listItems = [{
       headingId: 'releases',
       text: 'Releases',
       url: '/releases',
       isPathMatch: false,
-      innerLinks: innerLinks
+      innerLinks: []
     }]
-    let headings = [{
-      level: 2,
-      id: "u-port-connect",
-      isInView: true,
-      hasScrolledPast: false,
-      active: true
-    }]
+    this.props.data.allSitePage.edges[0].node.context.tocRepos.map(repo => {
+      let innerLinks = []
+      let repoDomId = repo.name.replace(/\s+/g, '-').toLowerCase().replace('uport-', 'u-port-')
+      headings.push({id: `${repoDomId}`,level: 2})
+      repo.releases.edges.map(release => {
+        let tagAnchor = (this.props.data.allSitePage.edges[0].node.context.slug === 'releases' ? `/releases/${repoDomId}#${release.node.tag.name.replace(/\s+/g, '-').toLowerCase()}` : `#${release.node.tag.name.replace(/\s+/g, '-').toLowerCase()}` )
+        innerLinks.push({
+          headingId: `${release.node.tag.name.replace(/\s+/g, '-').toLowerCase()}`,
+          text: release.node.tag.name,
+          url: tagAnchor,
+          isPathMatch: false
+        })
+      })
+      listItems.push({
+        headingId: `${repoDomId}`,
+        text: `${repo.name}`,
+        url: `/releases/${repoDomId}`,
+        isPathMatch: false,
+        innerLinks: innerLinks
+      })
+    })
     return (
       <Layout location={this.props.location}>
         <div className='index-container'>
@@ -67,15 +71,20 @@ class ReleasesTemplate extends React.Component {
                   </ToCContainer>
                   <Spacer span={1} />
                   <Col span={7}>
-                    <Announcement data={this.props.data.annoucement} />
-                    {this.props.data.allSitePage.edges[0].node.context.repositories.length > 1 ? <h1>Releases</h1> : null}
+                    <Announcement data={this.props.data.annoucement} /> 
                     {this.props.data.allSitePage.edges[0].node.context.repositories.map(repository => {
                       let repoId = `${repository.name.replace(/\s+/g, '-').toLowerCase()}`;
                       repoId = repoId.replace('uport-', 'u-port-')
                       return (<RepoContainer key={repoId} className='repository'>
-                        <h2 id={repoId} className='repoName'>{repository.name}</h2>
+                        <h2 id={repoId} className='repoName'>
+                          <a href={`/releases/#${repoId}`} aria-hidden='true' className='anchor'></a>
+                          {repository.name}
+                        </h2>
                         {repository.releases.edges.map(release => (<div key={release.node.name}>
-                          <p>{release.node.name}</p>
+                          <p id={release.node.tag.name} className='version'>
+                            <a href={`#${release.node.tag.name}`} aria-hidden='true' className='anchor'></a>
+                            {release.node.name}
+                          </p>
                           <div dangerouslySetInnerHTML={{__html: remark().use(remarkHtml).processSync(release.node.description).toString()}} />
                         </div>))}
                       </RepoContainer>)
@@ -146,11 +155,60 @@ const FooterContainer = styled.footer`
   clear: all;
 `
 const RepoContainer = styled.div`
+  margin-top: 60px;
   h1 {
     font-size: 18px;
   }
+  h2 {
+    margin-top: 0;
+    margin-bottom:0;
+    color: #5F5D68;
+  }
+  h3 {
+    color: #5F5D68;
+    padding-bottom: 10px;
+  }
   h2.repoName {
-    font-size: 26px;
+    font-size: 20px;
+    font-weight: 800;
+  }
+  p.version {
+    padding-top: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #5F5D68;
+  }
+  h2 code {
+    font-family: Nunito Sans;
+    font-size: 16px;
+  }
+  p {
+    color: #5F5D68;
+  }
+  ul {
+    list-style: none;
+    margin: 10px 0 10px 30px;
+    padding: 0;
+    li {
+      margin: 0 0 20px;
+      padding-left: 20px;
+      position: relative;
+      color: #5F5D68;
+    }
+    li::before {
+      background-image: url(${tick});
+      background-position: 0 2px;
+      background-repeat: no-repeat;
+      background-size: contain;
+      content: "";
+      color: #62b482;
+      height: 20px;
+      left: -15px;
+      text-align: center;
+      width: 20px;
+      position:absolute;
+      top: 0;
+    }
   }
 `
 
@@ -174,7 +232,21 @@ export const query = graphql`
           path
           context {
             slug,
-            repoNames,
+            tocRepos {
+              name,
+              url,
+              releases {
+                edges {
+                  node {
+                    name,
+                    url, 
+                    tag {
+                      name
+                    }
+                  }
+                }
+              }
+            },
             repositories {
               id,
               name,

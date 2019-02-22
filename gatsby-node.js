@@ -63,7 +63,6 @@ exports.createPages = ({graphql, actions}) => {
     const categoryPage = path.resolve("src/templates/category.jsx");
     const releasesPage = path.resolve("src/templates/releases.jsx");
     const repoIds = Object.keys(repositories).map(function (key) { return repositories[key] })
-    const repoNames = Object.keys(repositories)
     resolve(
       graphql(
         `
@@ -123,19 +122,18 @@ exports.createPages = ({graphql, actions}) => {
           context: {
             slug: 'releases',
             repositories: result.data.github.nodes,
-            repoNames: repoNames
+            tocRepos: result.data.github.nodes
           }
         })
-
         // Releases: Indiviual Repositories
         result.data.github.nodes.forEach(repository => {
           createPage({
-            path: `/releases/${repository.name}`,
+            path: `/releases/${repository.name.replace(/\s+/g, '-').toLowerCase().replace('uport-', 'u-port-')}`,
             component: releasesPage,
             context: {
-              slug: `${repository.name}`,
+              slug: `${repository.name.replace(/\s+/g, '-').toLowerCase().replace('uport-', 'u-port-')}`,
               repositories: [repository],
-              repoNames: repoNames
+              tocRepos: result.data.github.nodes
             }
           })
         })
