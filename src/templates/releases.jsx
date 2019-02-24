@@ -34,6 +34,7 @@ class ReleasesTemplate extends React.Component {
       headings.push({id: `${repoDomId}`,level: 2})
       repo.releases.edges.map(release => {
         let tagAnchor = (this.props.data.allSitePage.edges[0].node.context.slug === 'releases' ? `/releases/${repoDomId}#${release.node.tag.name.replace(/\s+/g, '-').toLowerCase()}` : `#${release.node.tag.name.replace(/\s+/g, '-').toLowerCase()}` )
+        headings.push({id: `${release.node.tag.name.replace(/\s+/g, '-').toLowerCase()}`, level: 3})
         innerLinks.push({
           headingId: `${release.node.tag.name.replace(/\s+/g, '-').toLowerCase()}`,
           text: release.node.tag.name,
@@ -166,7 +167,7 @@ const RepoContainer = styled.div`
   }
   h3 {
     color: #5F5D68;
-    padding-bottom: 10px;
+    margin: 40px 0 10px;
   }
   h2.repoName {
     font-size: 20px;
@@ -184,6 +185,7 @@ const RepoContainer = styled.div`
   }
   p {
     color: #5F5D68;
+    font-size: 16px;
   }
   ul {
     list-style: none;
