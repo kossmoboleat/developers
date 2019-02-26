@@ -29,7 +29,6 @@ class MyAppsConfigurator extends React.Component {
       },
       appDetails: {
         appName: '',
-        appURL: '',
         appDescription: '',
         appIdentity: {}
       },
@@ -58,7 +57,6 @@ class MyAppsConfigurator extends React.Component {
     let profileClaim = {'name': this.state.appDetails.appName}
     if (this.state.appDetails.ipfsLogoHash) profileClaim['profileImage'] = {'/': `/ipfs/${this.state.appDetails.ipfsLogoHash}`}
     if (this.state.appDetails.ipfsBgHash) profileClaim['bannerImage'] = {'/': `/ipfs/${this.state.appDetails.ipfsBgHash}`}
-    if (this.state.appDetails.appURL) profileClaim['url'] = this.state.appDetails.appURL
     if (this.state.appDetails.appDescription) profileClaim['description'] = this.state.appDetails.appDescription
 
     const credentials = new Credentials({

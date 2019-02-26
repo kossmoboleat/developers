@@ -7,7 +7,6 @@ import CancelModal from './CancelModal'
 import Footer from './Footer'
 import { Container, Grid, Col, Spacer } from '../../../layouts/grid'
 import { addFile } from '../../../utilities/ipfs'
-import { isValidHttpsUrl } from '../../../utilities/isValidUrl'
 import { default as track, trackPage } from '../../../utilities/track'
 import spin from '../../../utilities/spinanim'
 import errorIcon from '../../../images/error-icon.svg'
@@ -18,12 +17,8 @@ import '../../../layouts/css/myapps.css'
 class AppDetails extends Component {
   constructor (props) {
     super(props)
-    let appURL = props.appDetails.appURL
-      ? `https://${props.appDetails.appURL}`
-      : 'https://'
     this.state = {
       appName: props.appDetails.appName,
-      appURL,
       appDescription: props.appDescription,
       cancelModal: false,
       colorPicker: false,
@@ -37,12 +32,10 @@ class AppDetails extends Component {
       duplicateAppName: false,
       did: null,
       pk: null,
-      validUrl: appURL === "https://" || isValidHttpsUrl(appURL),
       isUploading: false,
       bgImageUploading: false
     }
     this.handleAppNameChange = this.handleAppNameChange.bind(this)
-    this.handleAppURLChange = this.handleAppURLChange.bind(this)
     this.handleAppImageChange = this.handleAppImageChange.bind(this)
     this.handleAccentColorChange = this.handleAccentColorChange.bind(this)
     this.handleBgImageUpload = this.handleBgImageUpload.bind(this)
@@ -58,28 +51,14 @@ class AppDetails extends Component {
     })
   }
   componentDidUpdate(prevProps, prevState) {
-    const { appNameValid, validUrl } = this.state
+    const { appNameValid } = this.state
     if(!appNameValid && prevState.appNameValid) {
       this.txtAppName.focus();
-    } else if(!validUrl && prevState.validUrl) {
-      this.txtAppURL.focus();
     }
   }
   handleAppNameChange (e) {
     this.setState({appName: e.target.value})
     e.target.value !== '' ? this.setState({appNameValid: true}) : this.setState({appNameValid: false})
-  }
-  handleAppURLChange (e) {
-    this.setState({
-      appURL: e.target.value
-    })
-  }
-  validateAppURL = () => {
-    const { appURL='' } = this.state
-    if(appURL === 'https://')
-      this.setState({ validUrl: true })
-    else
-      this.setState({ validUrl: !appURL || isValidHttpsUrl(appURL) })
   }
   handleAppDescriptionChange (e) {
     this.setState({appDescription: e.target.value})
@@ -129,7 +108,7 @@ class AppDetails extends Component {
         duplicateAppName: (uportAppNames.indexOf(this.state.appName) >= 0)
       })
     : this.setState({ appNameValid: true }, () => {
-      if (this.state.appNameValid && this.state.validUrl) {
+      if (this.state.appNameValid) {
         const {did, privateKey} = Credentials.createIdentity()
         const credentials = new Credentials({
           appName: this.state.appName,
@@ -151,7 +130,6 @@ class AppDetails extends Component {
             })
             this.props.getChildState('appDetails', {
               appName: this.state.appName,
-              appURL: this.state.appURL.replace(/^https:\/\//, ''),
               appDescription: this.state.appDescription,
               ipfsLogoHash: this.state.ipfsLogoHash,
               ipfsBgHash: this.state.ipfsBgHash,
@@ -199,7 +177,7 @@ class AppDetails extends Component {
     })
   }
   render () {
-    const { cancelModal, isUploading, validUrl, bgImageUploading } = this.state;
+    const { cancelModal, isUploading, bgImageUploading } = this.state;
     const bgImageStyle = {backgroundImage: this.state.ipfsLogoHash
       ? `url(https://ipfs.io/ipfs/${this.state.ipfsLogoHash})`
       : `url(${myAppsBg})`}
@@ -242,44 +220,6 @@ class AppDetails extends Component {
                           </span>
                         }
                       </div>
-                    </Col>
-                    <Spacer span={1} />
-                    <Spacer span={1} />
-                    <Col span={10}>
-                      <LabelRow>
-                        <label htmlFor='appURL'>
-                          URL Address {" "}
-                          <Subtle>(optional)</Subtle>
-                        </label>
-                        <Tooltip>
-                          <Tooltip.Hotspot>?</Tooltip.Hotspot>
-                          <Tooltip.Popover>
-                            <Tooltip.Body>
-                              <Tooltip.Header>Why we ask for URL address?</Tooltip.Header>
-                                <p>
-                                  Providing a URL can help establish trust with
-                                  your application. Following registration, we include
-                                  instructions for verifying ownership of your domain.
-                                </p>
-                            </Tooltip.Body>
-                          </Tooltip.Popover>
-                        </Tooltip>
-                      </LabelRow>
-                      <div className={!this.state.validUrl ? 'fieldError' : ''}>
-                        <input
-                          type='text'
-                          id='appURL'
-                          placeholder='https://yourapphomepage.com'
-                          value={this.state.appURL}
-                          onChange={this.handleAppURLChange}
-                          onBlur={this.validateAppURL}
-                          ref={r => this.txtAppURL=r} />
-                        {validUrl ||
-                          <span className='error'>
-                            <img src={errorIcon} />
-                            Invalid URL
-                          </span>}
-                        </div>
                     </Col>
                     <Spacer span={1} />
                     <Spacer span={1} />
@@ -387,7 +327,7 @@ class AppDetails extends Component {
             COMPLETE REGISTRATION
             {bgImageUploading ? <Loading src={loadingIcon} /> : null}
           </span>}
-        nextEnabled={!bgImageUploading && this.state.appNameValid && validUrl}
+        nextEnabled={!bgImageUploading && this.state.appNameValid}
         onNext={this.handleSubmit}
         onPrev={this.props.previousStep} />
       <CancelModal show={cancelModal} onClose={this.hideCancelModal} />
@@ -402,71 +342,6 @@ const LabelRow = styled.div`
 const Subtle = styled.span`
   font-weight: 400;
   text-transform: none;
-`
-const Tooltip = styled.div`
-  position: relative;
-  z-index: 2;
-`
-Tooltip.Hotspot = styled.div`
-  border: solid 1px #8986A0;
-  border-radius: 50%;
-  color: #8986A0;
-  cursor: pointer;
-  font-size: 10px;
-  height: 17px;
-  line-height: 17px;
-  position: relative;
-  text-align: center;
-  width: 17px;
-  z-index: 4;
-`
-Tooltip.Popover = styled.div`
-  opacity: 0;
-  padding-top: 35px;
-  position: absolute;
-  right: -20px;
-  top: 0;
-  visibility: hidden;
-  transition: opacity 0.3s, visibility 0.3s;
-
-  ${Tooltip}:hover & {
-    opacity: 1;
-    visibility: visible;
-  }
-`
-Tooltip.Body = styled.div`
-  background: #fcf2e5;
-  border: solid 1px #ffe1bd;
-  border-radius: 4px;
-  color: #5f5d68;
-  padding: 20px;
-  width: 237px;
-  &:before {
-    background: #fcf2e5;
-    border-left: solid 1px #ffe1bd;
-    border-bottom: solid 1px #ffe1bd;
-    content: "";
-    display: block;
-    height: 16px;
-    right: 24px;
-    position: absolute;
-    top: 28px;
-    transform: rotate(135deg);
-    width: 16px;
-    z-index: 3;
-  }
-  p {
-    font-size: 0.85em;
-    margin: 0;
-    padding: 0;
-  }
-`
-Tooltip.Header = styled.h5`
-  border-bottom: solid 1px rgba(95, 93, 104, 0.5);
-  font-size: 0.8em;
-  margin: 0 0 10px;
-  padding: 0 0 5px;
-  text-transform: uppercase;
 `
 const ColorPicker = styled.div`
   position: relative;
