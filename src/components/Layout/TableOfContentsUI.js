@@ -235,7 +235,7 @@ const Scrollpane = styled.div`
   background-color: #F2F3F9;
   border: solid 4px #F2F3F9;
   border-radius: 0 0 4px 4px;
-  height: 70vh;
+  max-height: 70vh;
   max-width: 320px;
   overflow-x: hidden;
   overflow-y: auto;
