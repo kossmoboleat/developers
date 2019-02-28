@@ -1,11 +1,11 @@
 {
   "production": {
-    "headerSearch": false
+    "headerSearch": true
   },
   "stage": {
-    "headerSearch": false
+    "headerSearch": true
   },
   "development": {
-    "headerSearch": false
+    "headerSearch": true
   }
 }
