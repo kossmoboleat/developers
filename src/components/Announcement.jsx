@@ -79,15 +79,12 @@ const theme = {
 
 const Container = styled.aside`
   align-self: center;
-  border: solid 1px;
+  border: none;
   border-radius: 0 0 4px 4px;
   border-top: none;
   display: grid;
   grid-template-columns: 1fr 50px;
-  margin: -85px 0 70px;
-  @media screen and (max-width: 768px) {
-    margin-bottom: 30px;
-  }
+  margin: -85px 0 30px;
   overflow: hidden;
   text-align: center;
   transition: margin-top 0.2s, visibility 0.5s;

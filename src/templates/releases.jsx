@@ -62,6 +62,7 @@ class ReleasesTemplate extends React.Component {
               />
             </HeaderContainer>
             <BodyContainer ref={ref => this.contentWindow=ref}>
+              <Announcement data={this.props.data.annoucement} />
               <Container>
                 <Grid>
                   <ToCContainer>
@@ -72,7 +73,6 @@ class ReleasesTemplate extends React.Component {
                   </ToCContainer>
                   <Spacer span={1} />
                   <Col span={7}>
-                    <Announcement data={this.props.data.annoucement} /> 
                     {this.props.data.allSitePage.edges[0].node.context.repositories.map(repository => {
                       let repoId = `${repository.name.replace(/\s+/g, '-').toLowerCase()}`;
                       repoId = repoId.replace('uport-', 'u-port-')
@@ -241,7 +241,7 @@ export const query = graphql`
                 edges {
                   node {
                     name,
-                    url, 
+                    url,
                     tag {
                       name
                     }

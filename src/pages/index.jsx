@@ -54,6 +54,7 @@ class Index extends React.Component {
               location={this.props.location}
               types={this.props.data.navTypes} />
             <Hero className={`home-hero`}>
+              <Announcement>{messages}</Announcement>
               <Container className='hero-wrapper'>
                 <Grid>
                   <Col span={7} large>
@@ -106,7 +107,6 @@ class Index extends React.Component {
                   </Col>
                 </Grid>
               </Container>
-              <Announcement>{messages}</Announcement>
             </Hero>
           </IndexHeadContainer>
           <BodyContainer className={`body-container`}>

@@ -77,6 +77,7 @@ class CategoryTemplate extends React.Component {
             />
           </HeaderContainer>
           <BodyContainer ref={ref => this.contentWindow=ref}>
+            <Announcement data={this.props.data} />
             <Container>
               <Grid>
                 <ToCContainer>
@@ -89,7 +90,6 @@ class CategoryTemplate extends React.Component {
                 </ToCContainer>
                 <Spacer span={1} />
                 <Col span={7}>
-                  <Announcement data={this.props.data} />
                   <CtaButton to={`${post.source}`}>
                     Edit
                   </CtaButton>
