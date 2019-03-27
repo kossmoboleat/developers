@@ -297,12 +297,11 @@ class AppDetails extends Component {
                     </Col>
                     <Spacer span={1} />
                     <Spacer span={1} />
-                    <Col span={5}>
-                      <Grid className='appBranding Grid'>
-                        <Col span={12} className='Grid-cell brandingSettings'>
-                          <h4>App Branding</h4>
-                        </Col>
-                        <Col span={12}>
+                    <Col span={10}>
+                      <label>App Branding <Subtle>(optional)</Subtle></label>
+                      <p style={{color: '#89879f',margin: '10px 0 30px'}}>To make sure your app looks trustworthy and stands out among other apps add your brand accent color and logo.</p>
+                      <Grid>
+                          <Col span={7}>
                           <div className='colorPicker'>
                             <label htmlFor='accentColor'>App Accent Color</label>
                             <input type='text'
@@ -324,8 +323,6 @@ class AppDetails extends Component {
 
                             </ColorPicker>
                           </div>
-                        </Col>
-                        <Col span={12}>
                           <div className='appImage'>
                             <label htmlFor='appImage'>App Profile Image</label>
                             {isUploading
@@ -340,25 +337,26 @@ class AppDetails extends Component {
                               style={bgImageStyle} />*/}
                           </div>
                         </Col>
-                      </Grid>
-                    </Col>
-                    <Col span={5}>
-                      <div className='Grid-cell brandingPreview'>
-                        <div className='appItem'>
-                          <div className='appCover' style={{backgroundColor: this.state.accentColor}}>&nbsp;</div>
-                          <div className={'avatar ' + (this.state.ipfsLogoHash ? 'uploaded' : 'default')} style={bgImageStyle}>
-                            &nbsp;
+                        <Col span={5}>
+                          <div>
+                            <label>Preview</label>
+                            <div className='appItem'>
+                              <div className='appCover' style={{backgroundColor: this.state.accentColor}}>&nbsp;</div>
+                              <div className={'avatar ' + (this.state.ipfsLogoHash ? 'uploaded' : 'default')} style={bgImageStyle}>
+                                &nbsp;
+                              </div>
+                              <h3 title={this.state.appName || 'App Name'}>
+                                {this.state.appName
+                                  ? this.state.appName.length > 32
+                                    ? `${this.state.appName.slice(0, 32)}...`
+                                    : this.state.appName
+                                  : 'App Name'}
+                              </h3>
+                              <span>{this.props.appEnvironment.network}</span>
+                            </div>
                           </div>
-                          <h3 title={this.state.appName || 'App Name'}>
-                            {this.state.appName
-                              ? this.state.appName.length > 32
-                                ? `${this.state.appName.slice(0, 32)}...`
-                                : this.state.appName
-                              : 'App Name'}
-                          </h3>
-                          <span>{this.props.appEnvironment.network}</span>
-                        </div>
-                      </div>
+                        </Col>
+                      </Grid>
                     </Col>
                     <Spacer span={1} />
                   </Grid>
