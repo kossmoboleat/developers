@@ -139,7 +139,6 @@ class ServiceDetails extends Component {
                             value={globalCheckbox}
                             ref={r => this.txtServiceName=r}
                           />
-                          <label htmlFor='global'></label>
                           <label htmlFor='global'>Services my app provides are global</label>
                         </Checkbox>
                       </form>
@@ -175,7 +174,6 @@ const Wrapper = styled.div`
 const Checkbox = styled.div`
   display: flex;
   align-items: center;
-
   .globalCheckbox {
     display: none;
   }

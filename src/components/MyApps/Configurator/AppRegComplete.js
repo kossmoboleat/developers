@@ -369,7 +369,6 @@ Step.Link = styled.a`
     vertical-align: middle;
   }
 `
-
 const Background = styled.div`
   bottom: -40px;
   left: 0;

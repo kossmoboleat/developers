@@ -30,7 +30,6 @@ class Verify extends Component {
       .then(doc => {
         console.log(doc)
         console.log(doc.publicKey[0].ethereumAddress + ' | ' + publicAddress)
-
         this.setState({verified: true, message: 'SUCCESS'})
         this.updateUportApps()
 
