@@ -160,8 +160,7 @@ const Body = styled.div`
   ${medium(`
     background-image: url(${imageBg});
     background-size: cover;
-    margin-bottom: 180px;
-    padding: 0;
+    padding: 0 0 180px;
   `)}
 
   .card-container {

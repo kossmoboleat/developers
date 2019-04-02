@@ -7,6 +7,8 @@ import imageBg from '../../../images/Products-BG.svg'
 import web3Img from '../../../images/web3monitor.png'
 import arrowImg from '../../../images/ArrowBlack.png'
 import orangeTick from '../../../images/orange-tick.svg'
+import verificationIcon from '../../../images/uport-verification-badge.svg'
+import marketplaceBg from '../../../images/uport-marketplace-bg.svg'
 import UnorderedList from '../../Layout/html/UnorderedList'
 import SendVerificationModal from '../../UportVerification'
 import SampleCode from './RegistrationComplete/SampleCode'
@@ -42,7 +44,7 @@ class AppRegComplete extends Component {
         name: this.props.appDetails.appName
       }
     })
-    this.showPopup()
+    // this.showPopup()
   }
   showPopup = () => {
     let uportApps = this.props.profile.uportApps || {}
@@ -124,7 +126,7 @@ class AppRegComplete extends Component {
   render () {
     const { appDetails, appEnvironment, signingKey, ipfsProfileHash } = this.props
     const { sendVerificationModal, claim, domainVerification, marketplaceOnboardingStarted, marketplaceOnboardingComplete } = this.state;
-  
+
     if (domainVerification.showDomainVerification) {
       return (<div>
         <Section>
@@ -135,7 +137,7 @@ class AppRegComplete extends Component {
       // Marketplace Onboarding
       return (<div>
         <Section>
-          <Onboarding 
+          <Onboarding
             appDetails={appDetails}
             domainVerification={domainVerification}
           />
@@ -152,74 +154,72 @@ class AppRegComplete extends Component {
                 <h2>Congratulations</h2>
                 <p>
                   {appDetails.appName} has joined uPort Marketplace
-                  Start building with the resources below, or take a look at our tutorials and docs.
+                  Start building with the resources below, or take a look at
+                  our tutorials and docs.
                 </p>
               </div>
               : <div>
                 <h2>Registration complete!</h2>
                 <p>
-                  Congrats! {appDetails.appName} now has an application identity with
-                  uPort.  Start building with the resources below, or take a look
-                  at our tutorials and docs.
+                  Congrats! {appDetails.appName} now has an application
+                  identity with uPort.  Start building with the resources
+                  below, or take a look at our tutorials and docs.
                 </p>
               </div>
             }
           </Success>
-          <NextStepsWrapper>
-          <div className='nextsteps-grid'>
-            <h2 className='nextsteps-grid-header'>Next Steps</h2>
-            <Wrapper>
-              <Content>
-                {!domainVerification.domainVerified 
-                  ? <Grid className='box'>
-                    <Col span={6} large className='left' />
-                    <Col span={6} large className='right'>
-                      <Grid className='right-wrap'>
-                        <Col span={12}>
+          <NextSteps>
+            <Content>
+              <label className='nextsteps-grid-header'>Next Steps</label>
+                {!domainVerification.domainVerified
+                  ? <Step>
+                      <Step.Left bg={verificationIcon} />
+                      <Step.Right>
                           <h2>Get uPort verification badge</h2>
                           <p>
-                            Verify your App URL domain in 2 easy steps and join the community of verified uPort users. Make your users feel safe while using your app. Protect them against phising.
+                            Verify your App URL domain in 2 easy steps and join
+                            the community of verified uPort users. Make your
+                            users feel safe while using your app. Protect them
+                            against phising.
                           </p>
-                        </Col>
-                        <Col span={12}>
-                          <a href='#' className='link' onClick={this.startDomainVerification}>
-                            GET STARTED
-                          </a>
-                        </Col>
-                      </Grid>
-                    </Col>
-                  </Grid>
-                : null}
-                {!marketplaceOnboardingComplete 
-                  ? <Grid className='box'>
-                    <Col span={6} large className='left' />
-                    <Col span={6} large className='right'>
-                      <Grid className='right-wrap'>
-                        <Col span={12}>
+                          <Step.Link
+                            href='#'
+                            className='link'
+                            onClick={this.startDomainVerification}
+                          >
+                            Get Started
+                          </Step.Link>
+                      </Step.Right>
+                    </Step>
+                  : null}
+                {!marketplaceOnboardingComplete
+                  ? <Step>
+                      <Step.Left bg={marketplaceBg} />
+                      <Step.Right>
                           <h2>Join uPort Marketplace</h2>
                           <p>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, set do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam. 
+                            Lorem ipsum dolor sit amet, consectetur adipiscing
+                            elit, set do eiusmod tempor incididunt ut labore
+                            et dolore magna aliqua. Ut enim ad minim veniam.
                           </p>
-                        </Col>
-                        <Col span={12}>
-                          <a href='#' className='link' onClick={this.startMarketplaceOnboarding}>
-                            GET STARTED
-                          </a>
-                        </Col>
-                      </Grid>
-                    </Col>
-                  </Grid>
+                          <Step.Link
+                            href='#'
+                            className='link'
+                            onClick={this.startMarketplaceOnboarding}
+                          >
+                            Get Started
+                          </Step.Link>
+                      </Step.Right>
+                    </Step>
                   : null}
               </Content>
-              <Background>
+              {/*<Background>
                 <Triangle viewBox="0 0 200 100">
                   <polygon points="0,100 0,75 200,45 200,100" className="triangle" />
                 </Triangle>
-              </Background>
-            </Wrapper>
-          </div>
-        </NextStepsWrapper>
-        <SampleCode 
+              </Background>*/}
+        </NextSteps>
+        <SampleCode
             appDetails={appDetails}
             appEnvironment={appEnvironment}
             signingKey={signingKey}
@@ -239,6 +239,7 @@ const Section = styled.section`
   .configuratorWrap & {
     width: 100%;
     background: #fff;
+    padding-bottom: 0;
   }
 `
 const Success = styled.header`
@@ -310,103 +311,69 @@ const Content = styled(Container)`
   position: relative;
   z-index: 4;
 `
-const Wrapper = styled.section`
-  position: relative;
-  .box {
-    background: #fff;
-    border-radius: 4px;
-    box-shadow: 0px 0px 20px rgba(139, 139, 139, 0.25);
-    overflow: hidden;
-    justify-content: space-between;
-  }
-  .left {
-    display: none;
-  }
-  .right {
+const NextSteps = styled.div`
+  background-color: #f2f2f2;
+  padding: 60px 20px;
 
+  & > label {
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 24px;
+    text-transform: uppercase;
   }
-  .right-wrap {
-    margin: 2em;
-  }
-  .subgrid {
-    justify-content: center;
-    margin: 40px 0;
-  }
-  .subleft {
 
+  ${Container} {
+    max-width: 790px;
   }
-  .subright {
-
+`
+const Step = styled.div`
+  background: #fff;
+  box-shadow: 0 0 10px rgba(139, 139, 139, 0.25);
+  display: flex;
+  margin: 20px auto;
+  & + & {
+    margin-top: 40px;
   }
-  hr {
-    margin: unset;
-    margin: initial;
-    border: 1px solid #e5e5e5;
-  }
+`
+Step.Left = styled.div`
+  background: transparent url(${props => props.bg}) left bottom no-repeat;
+  display: none;
+  flex: 3;
+  ${medium('display: block;')}
+`
+Step.Right = styled.div`
+  color: #3F3D4B;
+  flex: 5;
+  padding: 50px;
   h2 {
-    color: #3F3D4B;
-    font-size: 24px;
-    font-weight: 800;
-    font-style: normal;
-    line-height: 32px;
-    margin-top: 0;
-  }
-  li {
-    color: #E77E55;
-    font-weight: 700;
-  }
-  li::before {
-    background-image: url(${orangeTick});
+    font-weight: bold;
+    font-size: 22px;
+    line-height: 24px;
+    margin: 0;
   }
   p {
     font-size: 16px;
     line-height: 26px;
-    font-weight: normal;
-    font-style: normal;
-    color: #3F3D4B;
-  }
-  a {
-    color: #E77E55;
-    text-decoration: none;
-  }
-  .link {
-    font-style: normal;
-    font-weight: 800;
-    font-size: 14px;
-    line-height: 18px;
-    color: #3F3D4B;
-    grid-area: 2 / 1 / 3 / 3;
-  }
-  .link::after {
-    content: url(${arrowImg});
-    margin-left: 20px;
-    vertical-align: middle;
-    text-align: center;
-    background-size: contain;
-    background-repeat: no-repeat;
-  }
-  ${small(`
-    ul.second {
-      margin-top: -30px;
-    }
-  `)}
-  ${large(`
-    .left {
-      display: block;
-      background-image: url(${web3Img});
-      background-position: right bottom;
-      background-repeat: no-repeat;
-    }
-    .right-wrap {
-      margin: 76px 80px 30px 20px;
-    }
-  `)}
-  @media (min-width: 1137px) {
-    .left {
-      background-position: left bottom;
-    }
+    margin: 15px 0;
   }
 `
+Step.Link = styled.a`
+  color: #5C50CA;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 18px;
+  grid-area: 2 / 1 / 3 / 3;
+  text-decoration: none;
+  text-transform: uppercase;
+
+  &:after {
+    content: "\\2192";
+    font-size: 16px;
+    margin-left: 5px;
+    vertical-align: middle;
+  }
+`
+
 const Background = styled.div`
   bottom: -40px;
   left: 0;
