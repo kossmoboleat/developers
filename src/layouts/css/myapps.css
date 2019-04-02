@@ -265,8 +265,6 @@ span.note {
   padding: 0;
 }
 .networkDropdown {
-  /*width: 80%;*/
-  /*max-width: 450px;*/
   border: none;
   box-shadow: 0px 0px 12px 2px rgba(100,100,100,0.12);
   border-radius: 3px;

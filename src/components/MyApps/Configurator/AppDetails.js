@@ -96,7 +96,6 @@ class AppDetails extends Component {
   }
   handleSubmit (e) {
     e.preventDefault()
-    this.validateAppURL()
     let uportApps = this.props.uportApps || {}
     let uportAppNames = (Object.keys(uportApps).length > 0
       ? uportApps.map(app => app.name)
