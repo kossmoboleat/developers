@@ -85,6 +85,7 @@ class ServiceDetails extends Component {
                               id='issuerName'
                               value={appDetails.appName}
                               ref={r => this.txtIssuerName=r}
+                              readOnly
                             />
                           </Col>
                           <Col span={6}>
@@ -94,7 +95,8 @@ class ServiceDetails extends Component {
                               type='text'
                               id='urlAddress'
                               value={this.props.appUrl}
-                              ref={r => this.txtUrlAddress=r} />
+                              ref={r => this.txtUrlAddress=r}
+                              readOnly />
                           </Col>
                         </Grid>
                         <label htmlFor='serviceName'>Service Name</label>
@@ -138,7 +140,7 @@ class ServiceDetails extends Component {
                             ref={r => this.txtServiceName=r}
                           />
                           <label htmlFor='global'></label>
-                          <span>Services my app provides are global</span>
+                          <label htmlFor='global'>Services my app provides are global</label>
                         </Checkbox>
                       </form>
                     </Col>
@@ -171,9 +173,9 @@ const Wrapper = styled.div`
 `
 
 const Checkbox = styled.div`
-  label {
-    display: inline;
-  }
+  display: flex;
+  align-items: center;
+
   .globalCheckbox {
     display: none;
   }
@@ -196,19 +198,19 @@ const Checkbox = styled.div`
     color: #99a1a7;
   }
   .globalCheckbox:checked + label:after {
-    content: 'x';
-    font-size: 16px;
+    content: '\00d7';
+    font-size: 24px;
     position: absolute;
-    top: 6px;
-    left: 10px;
+    top: 5px;
+    left: 8px;
     color: #99a1a7;
   }
-  span {
-    position:absolute;
-    margin-top: 18px;
-    margin-left: 10px;
+  label:last-child {
     font-size: 16px;
     color: #3f3d4b;
+    font-weight: normal;
+    text-transform: none;
+    margin: 0 0 0 10px;
   }
 `
 
