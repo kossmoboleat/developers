@@ -113,7 +113,7 @@ class UploadDID extends Component {
                       </Pre>
                     </CodeContainer>
                   </Col>
-                  <Spacer span={1} /> 
+                  <Spacer span={1} />
                 </Grid>
               </div>
             </Col>
