@@ -1,4 +1,5 @@
-import shortId from 'shortid';
+import shortId from 'shortid'
 
-export default (id=shortId.generate()) =>
-  `https://api.uport.space/chasqui/topic/${id}`
+import CHASQUI_URL from '../constants/chasquiUrl'
+
+export default (id=shortId.generate()) => `${CHASQUI_URL}topic/${id}`
