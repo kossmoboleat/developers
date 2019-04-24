@@ -1,5 +1,11 @@
-import shortId from 'shortid'
+const shortId = require('shortid')
 
-import CHASQUI_URL from '../constants/chasquiUrl'
+const CHASQUI_URL = require('../constants/chasquiUrl')
 
-export default (id=shortId.generate()) => `${CHASQUI_URL}topic/${id}`
+function createChasquiUrl(id) {
+  if(!id)
+    id = shortId.generate()
+  return CHASQUI_URL + "topic/" + id
+}
+
+module.exports = createChasquiUrl
