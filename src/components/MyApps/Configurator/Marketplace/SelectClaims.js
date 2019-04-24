@@ -2,10 +2,25 @@ import React, { Component } from 'react'
 import Select from 'react-select'
 import styled from 'styled-components'
 import CancelModal from '../CancelModal'
+import AddClaimModal from './AddClaimModal'
 import Footer from '../Footer'
 import { Container, Grid, Col, Spacer, medium } from '../../../../layouts/grid'
 
-const requiredClaimTypeOptions = [
+let requiredClaimTypeOptions = [
+  { value: 'firstName', label: 'First Name' },
+  { value: 'lastName', label: 'Last Name' },
+  { value: 'dateOfBirth', label: 'Date of Birth' },
+  { value: 'emailAddress', label: 'Email Address' },
+  { value: 'phoneNumber', label: 'Phone Number' },
+  { value: 'address', label: 'Address' },
+  { value: 'addClaim', label: '+ Add Claim' }
+]
+
+let requiredIssuerOptions = [
+  { value: 'any', label: 'Any Issuer' }
+]
+
+let issuedClaimTypeOptions = [
   { value: 'firstName', label: 'First Name' },
   { value: 'lastName', label: 'Last Name' },
   { value: 'dateOfBirth', label: 'Date of Birth' },
@@ -14,13 +29,29 @@ const requiredClaimTypeOptions = [
   { value: 'address', label: 'Address' }
 ]
 
-const requiredIssuerOptions = [
-  { value: 'any', label: 'Any Issuer' }
-]
-
-const issuedClaimTypeOptions = [
-  { value: 'any', label: 'Any Issuer' }
-]
+function AddedIssuedClaims (props) {
+  const issuedClaims = props.addedClaims
+  const addedIssuedClaims = issuedClaims.map((issuedClaim, index) =>
+    <Grid key={index}>
+      <Col span={6}>
+        <label htmlFor='claimType'>Claim Type</label>
+        <Select
+          id='claimType'
+          className='networkDropdown'
+          classNamePrefix='networkDropdown'
+          value={issuedClaimTypeOptions.find(n => n.value === issuedClaim.claimType)}
+          onChange={(e) => props.handleAddedIssuedClaimTypeUpdate(index, e)}
+          options={issuedClaimTypeOptions}
+          isSearchable={false}
+          blurInputOnSelect
+        />
+      </Col>
+    </Grid>
+  )
+  return (
+    <div>{addedIssuedClaims}</div>
+  )
+}
 
 function AddedRequiredClaims (props) {
   const requiredClaims = props.addedClaims
@@ -56,7 +87,7 @@ function AddedRequiredClaims (props) {
           className='networkDropdown'
           classNamePrefix='networkDropdown'
           value={requiredIssuerOptions.find(n => n.value === requiredClaim.issuer)}
-          onChange={props.handleAddedRequiredClaimIssuerUpdate}
+          onChange={(e) => props.handleAddedRequiredClaimIssuerUpdate(index, e)}
           options={requiredIssuerOptions}
           isSearchable={false}
           blurInputOnSelect
@@ -75,26 +106,49 @@ class SelectClaims extends Component {
     super(props)
     this.state = {
       cancelModal: false,
+      addClaimModal: false,
       requiredClaimType: null,
       requiredIssuer: null,
       optional: false,
       requiredClaims: [],
+      issuedClaims: [],
       issuedClaimType: null,
       selectedClaimTypeObj: null,
       selectedIssuerObj: null,
       selectedIssuedClaimTypeObj: null
     }
+    this.showAddClaimModal = this.showAddClaimModal.bind(this)
+    this.handleNewClaimType = this.handleNewClaimType.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
     this.handleRequiredClaimTypeChange = this.handleRequiredClaimTypeChange.bind(this)
     this.handleRequiredIssuerChange = this.handleRequiredIssuerChange.bind(this)
+    this.handleIssuedClaimTypeChange = this.handleIssuedClaimTypeChange.bind(this)
     this.handleAddRequiredClaim = this.handleAddRequiredClaim.bind(this)
-    this.handleAddedRequiredClaimUpdate = this.handleAddedRequiredClaimUpdate.bind(this)
+    this.handleAddIssuedClaim = this.handleAddIssuedClaim.bind(this)
     this.handleAddedRequiredClaimIssuerUpdate = this.handleAddedRequiredClaimIssuerUpdate.bind(this)
+    this.handleAddedRequiredClaimTypeUpdate = this.handleAddedRequiredClaimTypeUpdate.bind(this)
+    this.handleAddedIssuedClaimTypeUpdate = this.handleAddedIssuedClaimTypeUpdate.bind(this)
+  }
+  showAddClaimModal = () => {
+    this.setState({ addClaimModal: true })
+  }
+  hideAddClaimModal = () => {
+    this.setState({ addClaimModal: false })
   }
   handleRequiredClaimTypeChange (selectedOption) {
+    if (selectedOption.value === 'addClaim') {
+      this.showAddClaimModal()
+    } else {
+      this.setState({
+        requiredClaimType: selectedOption.value,
+        selectedRequiredClaimTypeObj: selectedOption
+      })
+    }
+  }
+  handleIssuedClaimTypeChange (selectedOption) {
     this.setState({
-      requiredClaimType: selectedOption.value,
-      selectedRequiredClaimTypeObj: selectedOption
+      issuedClaimType: selectedOption.value,
+      selectedIssuedClaimTypeObj: selectedOption
     })
   }
   handleRequiredIssuerChange (selectedOption) {
@@ -113,25 +167,49 @@ class SelectClaims extends Component {
     })
     this.setState({requiredClaims: requiredClaims})
   }
-  handleAddedRequiredClaimTypeUpdate (selectedOption, index) {
-    console.log('handleAddedRequiredClaimTypeUpdate')
-    console.log(selectedOption)
-    console.log(index)
+  handleAddIssuedClaim (e) {
+    if (e) e.preventDefault()
+    let issuedClaims = this.state.issuedClaims
+    issuedClaims.push({
+      claimType: this.state.issuedClaimType
+    })
+    this.setState({issuedClaims: issuedClaims})
+  }
+  handleAddedRequiredClaimTypeUpdate (index, selectedOption) {
+    let requiredClaims = this.state.requiredClaims
+    requiredClaims[index].claimType = selectedOption.value
+    this.setState({requiredClaims: requiredClaims})
   }
   handleAddedRequiredClaimIssuerUpdate (index, selectedOption) {
-    console.log(requiredClaims[index])
+    let requiredClaims = this.state.requiredClaims
+    requiredClaims[index].issuer = selectedOption.value
+    this.setState({requiredClaims: requiredClaims})
   }
-  handleAddedRequiredClaimUpdate (selectedOption) {
-    console.log('handleAddedRequiredClaimUpdate')
+  handleAddedIssuedClaimTypeUpdate (index, selectedOption) {
+    let issuedClaims = this.state.issuedClaims
+    issuedClaims[index].claimType = selectedOption.value
+    this.setState({issuedClaims: issuedClaims})
+  }
+  handleNewClaimType (newClaimType) {
+    requiredClaimTypeOptions.unshift({value: newClaimType, label: newClaimType})
+    this.setState({
+      requiredClaimType: newClaimType,
+      selectedRequiredClaimTypeObj: requiredClaimTypeOptions[0]
+    })
+    this.hideAddClaimModal()
   }
   handleSubmit (e) {
-    this.props.getChildState('claims', {thing: 'thingName'})
+    const { requiredClaims, issuedClaims } = this.state
+    this.props.getChildState('selectClaims', {
+      requiredClaims: requiredClaims,
+      issuedClaims: issuedClaims
+    })
   }
   render () {
-    const { cancelModal, requiredClaims } = this.state
+    const { cancelModal, addClaimModal, requiredClaims, issuedClaims } = this.state
     return (
       <Wrapper>
-        <section className={`${cancelModal ? 'blurred' : ''}`}>
+        <section className={`${cancelModal || addClaimModal ? 'blurred' : ''}`}>
           <Container>
             <Grid>
               <Spacer span={1} />
@@ -202,6 +280,9 @@ class SelectClaims extends Component {
                         </Grid>
                         <h2>Claims your service issues</h2>
                         <p>Verified information about your users they receive while using your services</p>
+                        <AddedIssuedClaims
+                          addedClaims={issuedClaims}
+                        />
                         <Grid>
                           <Col span={6}>
                             <label htmlFor='issuedClaimType'>ClaimType</label>
@@ -210,7 +291,7 @@ class SelectClaims extends Component {
                               className='networkDropdown'
                               classNamePrefix='networkDropdown'
                               value={this.state.selectedIssuedClaimTypeObj}
-                              onChange={this.handleIssuerChange}
+                              onChange={this.handleIssuedClaimTypeChange}
                               options={issuedClaimTypeOptions}
                               isSearchable={false}
                               blurInputOnSelect
@@ -219,7 +300,7 @@ class SelectClaims extends Component {
                         </Grid>
                         <Grid>
                           <Col span={12}>
-                            <AddClaim>+ Add Claim</AddClaim>
+                            <AddClaim onClick={this.handleAddIssuedClaim}>+ Add Claim</AddClaim>
                           </Col>
                         </Grid>
                       </form>
@@ -231,6 +312,7 @@ class SelectClaims extends Component {
           </Container>
         </section>
         <CancelModal show={cancelModal} onClose={this.hideCancelModal} />
+        <AddClaimModal show={addClaimModal} handleNewClaimType={this.handleNewClaimType} onClose={this.hideAddClaimModal} />
         <Footer
           Prev={() => (<div>
           SERVICE DETAILS

@@ -17,6 +17,7 @@ module.exports = {
   userDescription: "Your ID.  For you.", // User description to display in the author segment.
   segmentProdKey: "TP9aPQLX69CtFXTtQtRmqGjUjNgRiRo3",
   segmentDevKey: "boMqWSoJzbLPUMwFuAmxjrVdcjKhxh3j",
+  marketplaceEndpoint: 'https://em0tmjcepc.execute-api.us-east-1.amazonaws.com/dev/graphql', // Marketplace GraphQL Endpoint
   copyright: "Copyright © 2018", // Copyright string for the footer of the website and RSS feed.
   themeColor: "#5c50ca", // Used for setting manifest and progress theme colors.
   backgroundColor: "#e0e0e0", // Used for setting manifest background color.
