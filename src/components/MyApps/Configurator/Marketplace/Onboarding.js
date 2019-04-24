@@ -19,7 +19,7 @@ class Onboarding extends React.Component {
         location: '',
         global: false
       },
-      claims: {}
+      selectClaims: {}
     }
     this.getChildState = this.getChildState.bind(this)
     this.nextStep = this.nextStep.bind(this)
@@ -28,7 +28,6 @@ class Onboarding extends React.Component {
   async getChildState (childName, childState) {
     let childStateObject = {}
     childStateObject[childName] = childState
-    console.log(childStateObject)
     this.setState(childStateObject)
     this.nextStep()
   }
@@ -44,7 +43,7 @@ class Onboarding extends React.Component {
   }
   render () {
     const { appDetails } = this.props
-    const { serviceDetails } = this.state
+    const { serviceDetails, selectClaims } = this.state
     return (
       <div className='index-container' style={{minHeight: '100vh'}}>
         <Helmet title={config.siteTitle} />
@@ -65,6 +64,10 @@ class Onboarding extends React.Component {
                       previousStep={this.previousStep} />
                   case 3:
                     return <Review
+                      appUrl={this.props.domainVerification.appUrl}
+                      appDetails={appDetails}
+                      serviceDetails={serviceDetails}
+                      selectClaims={selectClaims}
                       getChildState={this.getChildState}
                       previousStep={this.previousStep} />
                   default :

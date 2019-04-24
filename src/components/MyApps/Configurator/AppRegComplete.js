@@ -44,7 +44,7 @@ class AppRegComplete extends Component {
         name: this.props.appDetails.appName
       }
     })
-    // this.showPopup()
+    this.showPopup()
   }
   showPopup = () => {
     let uportApps = this.props.profile.uportApps || {}
@@ -76,6 +76,7 @@ class AppRegComplete extends Component {
     }
     if (this.props.profile.uportApps) {
       if (!domainVerification.domainVerified) {
+        console.log(claim)
         this.props.setCurrentApp(claim, uportApps.length)
         uportApps.push(claim)
       } else {

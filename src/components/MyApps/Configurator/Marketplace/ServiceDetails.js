@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
+import config from '../../../../../data/SiteConfig'
 import Select from 'react-select'
 import CancelModal from '../CancelModal'
 import Footer from '../Footer'
@@ -31,7 +32,40 @@ class ServiceDetails extends Component {
     this.handleLocationChange = this.handleLocationChange.bind(this)
   }
   handleSubmit (e) {
+    const { appDetails, appUrl } = this.props
     const { serviceName, serviceDescription, location, globalCheckbox } = this.state
+
+    let query = {'query': `mutation {
+      createEntity(
+        input: {
+          entity: {
+            name: "${appDetails.appName}",
+            url: "${appUrl}",
+            serviceName: "${serviceName}"
+            serviceDescription: "${serviceDescription}"
+          }
+        }
+      )
+      {
+        entity {
+          name
+          url
+          serviceName
+          serviceDescription
+        }
+      }
+      }`
+    }
+    fetch(config.marketplaceEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(query)
+    })
+    .then(res => res.json())
+    .then(res => console.log(res))
+
     this.props.getChildState('serviceDetails', {
       serviceName: serviceName,
       serviceDescription: serviceDescription,
