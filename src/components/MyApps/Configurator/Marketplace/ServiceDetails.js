@@ -173,6 +173,7 @@ class ServiceDetails extends Component {
                             value={globalCheckbox}
                             ref={r => this.txtServiceName=r}
                           />
+                          <label htmlFor='global' />
                           <label htmlFor='global'>Services my app provides are global</label>
                         </Checkbox>
                       </form>

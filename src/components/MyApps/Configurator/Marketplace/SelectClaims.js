@@ -26,7 +26,8 @@ let issuedClaimTypeOptions = [
   { value: 'dateOfBirth', label: 'Date of Birth' },
   { value: 'emailAddress', label: 'Email Address' },
   { value: 'phoneNumber', label: 'Phone Number' },
-  { value: 'address', label: 'Address' }
+  { value: 'address', label: 'Address' },
+  { value: 'addClaim', label: '+ Add Claim' }
 ]
 
 function AddedIssuedClaims (props) {
@@ -110,12 +111,13 @@ class SelectClaims extends Component {
       requiredClaimType: null,
       requiredIssuer: null,
       optional: false,
-      requiredClaims: [],
-      issuedClaims: [],
+      requiredClaims: this.props.requiredClaims || [],
+      issuedClaims: this.props.issuedClaims || [],
       issuedClaimType: null,
       selectedClaimTypeObj: null,
       selectedIssuerObj: null,
-      selectedIssuedClaimTypeObj: null
+      selectedIssuedClaimTypeObj: null,
+      claimField: null
     }
     this.showAddClaimModal = this.showAddClaimModal.bind(this)
     this.handleNewClaimType = this.handleNewClaimType.bind(this)
@@ -129,15 +131,15 @@ class SelectClaims extends Component {
     this.handleAddedRequiredClaimTypeUpdate = this.handleAddedRequiredClaimTypeUpdate.bind(this)
     this.handleAddedIssuedClaimTypeUpdate = this.handleAddedIssuedClaimTypeUpdate.bind(this)
   }
-  showAddClaimModal = () => {
-    this.setState({ addClaimModal: true })
+  showAddClaimModal (type, index) {
+    this.setState({ addClaimModal: true, claimField: {type: type, index: index} })
   }
   hideAddClaimModal = () => {
-    this.setState({ addClaimModal: false })
+    this.setState({ addClaimModal: false, claimField: null })
   }
   handleRequiredClaimTypeChange (selectedOption) {
     if (selectedOption.value === 'addClaim') {
-      this.showAddClaimModal()
+      this.showAddClaimModal('requiredClaimType', 0)
     } else {
       this.setState({
         requiredClaimType: selectedOption.value,
@@ -146,10 +148,14 @@ class SelectClaims extends Component {
     }
   }
   handleIssuedClaimTypeChange (selectedOption) {
-    this.setState({
-      issuedClaimType: selectedOption.value,
-      selectedIssuedClaimTypeObj: selectedOption
-    })
+    if (selectedOption.value === 'addClaim') {
+      this.showAddClaimModal('issuedClaimType', 0)
+    } else {
+      this.setState({
+        issuedClaimType: selectedOption.value,
+        selectedIssuedClaimTypeObj: selectedOption
+      })
+    }
   }
   handleRequiredIssuerChange (selectedOption) {
     this.setState({
@@ -182,20 +188,56 @@ class SelectClaims extends Component {
   }
   handleAddedRequiredClaimIssuerUpdate (index, selectedOption) {
     let requiredClaims = this.state.requiredClaims
-    requiredClaims[index].issuer = selectedOption.value
-    this.setState({requiredClaims: requiredClaims})
+    if (selectedOption.value === 'addClaim') {
+      this.showAddClaimModal('addedRequiredClaimType', index)
+    } else {
+      requiredClaims[index].issuer = selectedOption.value
+      this.setState({requiredClaims: requiredClaims})
+    }
   }
   handleAddedIssuedClaimTypeUpdate (index, selectedOption) {
     let issuedClaims = this.state.issuedClaims
-    issuedClaims[index].claimType = selectedOption.value
-    this.setState({issuedClaims: issuedClaims})
+    if (selectedOption.value === 'addClaim') {
+      this.showAddClaimModal('addedIssuedClaimType', index)
+    } else {
+      issuedClaims[index].claimType = selectedOption.value
+      this.setState({issuedClaims: issuedClaims})
+    }
   }
-  handleNewClaimType (newClaimType) {
-    requiredClaimTypeOptions.unshift({value: newClaimType, label: newClaimType})
-    this.setState({
-      requiredClaimType: newClaimType,
-      selectedRequiredClaimTypeObj: requiredClaimTypeOptions[0]
-    })
+  handleNewClaimType (newClaimType, claimField) {
+    const { issuedClaims, requiredClaims } = this.state
+    if (claimField) {
+      switch (claimField.type) {
+        case 'issuedClaimType':
+          console.log('SC: issuedClaimType')
+          issuedClaimTypeOptions.unshift({value: newClaimType, label: newClaimType})
+          this.setState({
+            issuedClaimType: newClaimType,
+            selectedIssuedClaimTypeObj: issuedClaimTypeOptions[0]
+          })
+          break;
+        case 'requiredClaimType':
+          console.log('SC: requiredClaimType')
+          requiredClaimTypeOptions.unshift({value: newClaimType, label: newClaimType})
+          this.setState({
+            requiredClaimType: newClaimType,
+            selectedRequiredClaimTypeObj: requiredClaimTypeOptions[0]
+          })
+          break;
+        case 'addedIssuedClaimType':
+          console.log('SC: addedIssuedClaimType')
+          issuedClaimTypeOptions.unshift({value: newClaimType, label: newClaimType})
+          issuedClaims[claimField.index].claimType = newClaimType
+          this.setState({issuedClaims: issuedClaims})
+          break;
+        case 'addedRequiredClaimType':
+          console.log('SC: addedRequiredClaimType')
+          requiredClaimTypeOptions.unshift({value: newClaimType, label: newClaimType})
+          requiredClaims[claimField.index].claimType = newClaimType
+          this.setState({requiredClaims: requiredClaims})
+          break;
+      }
+    }
     this.hideAddClaimModal()
   }
   handleSubmit (e) {
@@ -206,7 +248,8 @@ class SelectClaims extends Component {
     })
   }
   render () {
-    const { cancelModal, addClaimModal, requiredClaims, issuedClaims } = this.state
+    const { cancelModal, addClaimModal, requiredClaims, issuedClaims, claimField } = this.state
+    const { appDetails, serviceDetails } = this.props
     return (
       <Wrapper>
         <section className={`${cancelModal || addClaimModal ? 'blurred' : ''}`}>
@@ -228,80 +271,81 @@ class SelectClaims extends Component {
                   <Grid>
                     <Spacer span={1} />
                     <Col span={10}>
-                      <h2>Claims your service requires</h2>
-                      <p>Information that you want to request from users in order to let them use your service. Select Issuer to specify who this information should be verified by.</p>
-                      <form>
-                        <AddedRequiredClaims
-                          addedClaims={requiredClaims}
-                          handleAddedRequiredClaimTypeUpdate={this.handleAddedRequiredClaimTypeUpdate}
-                          handleAddedRequiredClaimIssuerUpdate={this.handleAddedRequiredClaimIssuerUpdate}
-                        />
-                        <Grid>
-                          <Col span={6}>
-                            <label htmlFor='claimType'>Claim Type</label>
-                            <Select
-                              id='claimType'
-                              className='networkDropdown'
-                              classNamePrefix='networkDropdown'
-                              value={this.state.selectedRequiredClaimTypeObj}
-                              onChange={this.handleRequiredClaimTypeChange}
-                              options={requiredClaimTypeOptions}
-                              isSearchable={false}
-                              blurInputOnSelect
-                            />
-                            <Checkbox>
-                              <input
-                                type='checkbox'
-                                className='claimOptional'
-                                id='global'
-                                value={``}
-                                ref={r => this.txtServiceName=r}
+                      <h2>Claims your service issues</h2>
+                        <form>
+                          <p>Verified information about your users they receive while using your services</p>
+                          <AddedIssuedClaims
+                            addedClaims={issuedClaims}
+                            handleAddedIssuedClaimTypeUpdate={this.handleAddedIssuedClaimTypeUpdate}
+                          />
+                          <Grid>
+                            <Col span={6}>
+                              <label htmlFor='issuedClaimType'>ClaimType</label>
+                              <Select
+                                id='issuedClaimType'
+                                className='networkDropdown'
+                                classNamePrefix='networkDropdown'
+                                value={this.state.selectedIssuedClaimTypeObj}
+                                onChange={this.handleIssuedClaimTypeChange}
+                                options={issuedClaimTypeOptions}
+                                isSearchable={false}
+                                blurInputOnSelect
                               />
-                              <label htmlFor='claimOptional' />
-                              <span>This claim is optional</span>
-                            </Checkbox>
-                          </Col>
-                          <Col span={6}>
-                            <label htmlFor='issuedBy'>Issued By</label>
-                            <Select
-                              id='issuedBy'
-                              className='networkDropdown'
-                              classNamePrefix='networkDropdown'
-                              value={this.state.selectedRequiredIssuerObj}
-                              onChange={this.handleRequiredIssuerChange}
-                              options={requiredIssuerOptions}
-                              isSearchable={false}
-                              blurInputOnSelect
-                            />
-                          </Col>
-                          <Col span={12}>
-                            <AddClaim onClick={this.handleAddRequiredClaim}>+ Add Claim</AddClaim>
-                          </Col>
-                        </Grid>
-                        <h2>Claims your service issues</h2>
-                        <p>Verified information about your users they receive while using your services</p>
-                        <AddedIssuedClaims
-                          addedClaims={issuedClaims}
-                        />
-                        <Grid>
-                          <Col span={6}>
-                            <label htmlFor='issuedClaimType'>ClaimType</label>
-                            <Select
-                              id='issuedClaimType'
-                              className='networkDropdown'
-                              classNamePrefix='networkDropdown'
-                              value={this.state.selectedIssuedClaimTypeObj}
-                              onChange={this.handleIssuedClaimTypeChange}
-                              options={issuedClaimTypeOptions}
-                              isSearchable={false}
-                              blurInputOnSelect
-                            />
-                          </Col>
-                        </Grid>
-                        <Grid>
-                          <Col span={12}>
-                            <AddClaim onClick={this.handleAddIssuedClaim}>+ Add Claim</AddClaim>
-                          </Col>
+                            </Col>
+                          </Grid>
+                          <Grid>
+                            <Col span={12}>
+                              <AddClaim onClick={this.handleAddIssuedClaim}>+ Add Claim</AddClaim>
+                            </Col>
+                          </Grid>
+                          <h2>Claims your service requires</h2>
+                          <p>Information that you want to request from users in order to let them use your service. Select Issuer to specify who this information should be verified by.</p>
+                          <AddedRequiredClaims
+                            addedClaims={requiredClaims}
+                            handleAddedRequiredClaimTypeUpdate={this.handleAddedRequiredClaimTypeUpdate}
+                            handleAddedRequiredClaimIssuerUpdate={this.handleAddedRequiredClaimIssuerUpdate}
+                          />
+                          <Grid>
+                            <Col span={6}>
+                              <label htmlFor='claimType'>Claim Type</label>
+                              <Select
+                                id='claimType'
+                                className='networkDropdown'
+                                classNamePrefix='networkDropdown'
+                                value={this.state.selectedRequiredClaimTypeObj}
+                                onChange={this.handleRequiredClaimTypeChange}
+                                options={requiredClaimTypeOptions}
+                                isSearchable={false}
+                                blurInputOnSelect
+                              />
+                              <Checkbox>
+                                <input
+                                  type='checkbox'
+                                  className='claimOptional'
+                                  id='global'
+                                  value={``}
+                                  ref={r => this.txtServiceName=r}
+                                />
+                                <label htmlFor='claimOptional' />
+                                <span>This claim is optional</span>
+                              </Checkbox>
+                            </Col>
+                            <Col span={6}>
+                              <label htmlFor='issuedBy'>Issued By</label>
+                              <Select
+                                id='issuedBy'
+                                className='networkDropdown'
+                                classNamePrefix='networkDropdown'
+                                value={this.state.selectedRequiredIssuerObj}
+                                onChange={this.handleRequiredIssuerChange}
+                                options={requiredIssuerOptions}
+                                isSearchable={false}
+                                blurInputOnSelect
+                              />
+                            </Col>
+                            <Col span={12}>
+                              <AddClaim onClick={this.handleAddRequiredClaim}>+ Add Claim</AddClaim>
+                            </Col>
                         </Grid>
                       </form>
                     </Col>
@@ -312,12 +356,14 @@ class SelectClaims extends Component {
           </Container>
         </section>
         <CancelModal show={cancelModal} onClose={this.hideCancelModal} />
-        <AddClaimModal show={addClaimModal} handleNewClaimType={this.handleNewClaimType} onClose={this.hideAddClaimModal} />
+        <AddClaimModal show={addClaimModal} handleNewClaimType={this.handleNewClaimType} claimField={claimField} onClose={this.hideAddClaimModal} />
         <Footer
           Prev={() => (<div>
           SERVICE DETAILS
             <p>
-              stuff
+              {appDetails.appName}
+              <span>&nbsp;|&nbsp;</span>
+              {serviceDetails.serviceName}
             </p>
           </div>)}
           Next={() => <span>SELECT CLAIMS</span>}

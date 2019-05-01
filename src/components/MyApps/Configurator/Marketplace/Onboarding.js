@@ -60,7 +60,10 @@ class Onboarding extends React.Component {
                       getChildState={this.getChildState} />
                   case 2:
                     return <SelectClaims
+                      appDetails={appDetails}
+                      serviceDetails={serviceDetails}
                       getChildState={this.getChildState}
+                      selectClaims={selectClaims}
                       previousStep={this.previousStep} />
                   case 3:
                     return <Review

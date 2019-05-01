@@ -137,8 +137,10 @@ class Review extends Component {
             </p>
           </div>)}
           Next={() => <span>SUBMIT</span>}
-          nextEnabled={true}
-          onNext={this.handleSubmit} />
+          onNext={this.handleSubmit}
+          onPrev={this.props.previousStep}
+          nextEnabled
+          />
       </Wrapper>
     )
   }

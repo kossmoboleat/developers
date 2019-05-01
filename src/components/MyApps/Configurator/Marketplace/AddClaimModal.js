@@ -16,7 +16,7 @@ class AddClaimModal extends React.Component {
   }
   handleSubmit (e) {
     if (e && e.preventDefault) e.preventDefault()
-    this.props.handleNewClaimType(this.state.newClaimType)
+    this.props.handleNewClaimType(this.state.newClaimType, this.props.claimField)
   }
   render () {
     const { show } = this.props
