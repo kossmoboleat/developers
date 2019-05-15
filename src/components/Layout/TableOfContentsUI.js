@@ -89,14 +89,16 @@ export default class TableOfContentsUI extends React.Component {
   render () {
     const { listItems } = this.props
     const { activeHeadings } = this.state
-    const title = listItems[0].text
+    const title = listItems[0].text.replace(/u-?port/gi, 'uPort')
     const links = listItems.map(li => {
       const innerLinks = li.innerLinks.map(cc => {
         const isActive = Boolean(activeHeadings.find(hId => hId == cc.headingId))
         return (<li key={cc.text}>
           <ContentContainer>
             <a href={cc.url}>
-              <h6 className={`${ isActive ? 'active' : ''}`}>{cc.text}</h6>
+              <h6 className={`${ isActive ? 'active' : ''}`}>
+                {cc.text.replace(/u-?port/gi, 'uPort')}
+              </h6>
             </a>
           </ContentContainer>
         </li>)
@@ -109,7 +111,7 @@ export default class TableOfContentsUI extends React.Component {
         <Link to={`${li.url}`}>
           <span>
             <h5 className={`tocHeading ${isActive ? 'active' : ''}`}>
-              {li.text}
+              {li.text.replace(/u-?port/gi, 'uPort')}
             </h5>
           </span>
         </Link>
@@ -235,7 +237,7 @@ const Scrollpane = styled.div`
   background-color: #F2F3F9;
   border: solid 4px #F2F3F9;
   border-radius: 0 0 4px 4px;
-  max-height: 70vh;
+  max-height: calc(70vh - 60px);
   max-width: 320px;
   overflow-x: hidden;
   overflow-y: auto;
