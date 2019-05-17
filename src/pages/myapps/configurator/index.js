@@ -29,7 +29,6 @@ class MyAppsConfigurator extends React.Component {
       },
       appDetails: {
         appName: '',
-        appURL: '',
         appDescription: '',
         appIdentity: {}
       },
@@ -58,7 +57,6 @@ class MyAppsConfigurator extends React.Component {
     let profileClaim = {'name': this.state.appDetails.appName}
     if (this.state.appDetails.ipfsLogoHash) profileClaim['profileImage'] = {'/': `/ipfs/${this.state.appDetails.ipfsLogoHash}`}
     if (this.state.appDetails.ipfsBgHash) profileClaim['bannerImage'] = {'/': `/ipfs/${this.state.appDetails.ipfsBgHash}`}
-    if (this.state.appDetails.appURL) profileClaim['url'] = this.state.appDetails.appURL
     if (this.state.appDetails.appDescription) profileClaim['description'] = this.state.appDetails.appDescription
 
     const credentials = new Credentials({
@@ -148,7 +146,7 @@ class MyAppsConfigurator extends React.Component {
                       profile={this.props.profile}
                       appDetails={this.state.appDetails}
                       appEnvironment={this.state.appEnvironment}
-                      getChildState={this.getChildState}
+                      setCurrentApp={this.props.setCurrentApp}
                       saveApps={this.props.saveApps}
                       ipfsProfileHash={this.state.ipfsProfileHash}
                       signingKey={this.state.pk} />
@@ -231,6 +229,9 @@ const mapDispatchToProps = dispatch => ({
   },
   redirectToMyApps() {
     dispatch(actions.redirectToMyApps())
+  },
+  setCurrentApp(app, index) {
+    dispatch({ type: `SET_CURRENT_APP`, app: app, index: index })
   }
 })
 

@@ -4,98 +4,51 @@ import { Link } from 'gatsby'
 import cog from '../../../images/cog.svg'
 import tick from '../../../images/greenTick.svg'
 import imageBg from '../../../images/Products-BG.svg'
+import web3Img from '../../../images/web3monitor.png'
+import arrowImg from '../../../images/ArrowBlack.png'
+import orangeTick from '../../../images/orange-tick.svg'
+import verificationIcon from '../../../images/uport-verification-badge.svg'
+import marketplaceBg from '../../../images/uport-marketplace-bg.svg'
 import UnorderedList from '../../Layout/html/UnorderedList'
-import VerificationModal from './VerificationModal'
-import CopyButton from './CopyButton'
 import SendVerificationModal from '../../UportVerification'
-import { Container, Grid, Col, medium } from '../../../layouts/grid'
-import copyToClipboard from '../../../helpers/copyToClipboard'
+import SampleCode from './RegistrationComplete/SampleCode'
+import VerifyDomain from './VerifyDomain/VerifyDomain'
+import Onboarding from './Marketplace/Onboarding'
+import { Container, Grid, Col, medium, large, small } from '../../../layouts/grid'
 import track, { trackPage } from '../../../utilities/track'
 
-const installCodeServer =
-`npm init
-npm install --save uport-credentials
-`
-const installCodeClient =
-`npm init
-npm install --save uport-connect
-`
-const initServerCode = (appDetails, appEnvironment, pk) =>
-`import { Credentials } from "uport-credentials"
-
-const uport = new Credentials({
-  did: "${appDetails.appIdentity.did}",
-  privateKey: "${pk}"
-})`
-
-const disclosureServerCode = (ipfsProfileHash) =>
-`uport.createDisclosureRequest({
-  notifications: true,
-  callbackUrl: endpoint + '/callback',
-  vc: ['/ipfs/${ipfsProfileHash}']
-  }).then(requestToken => {
-    ...
-  })
-})`
-
-const initClientCode = (appDetails, appEnvironment) =>
-`import { Connect } from "uport-connect"
-
-const uport = new Connect('${appDetails.appName}', {
-  network: "${appEnvironment.network}",
-  profileImage: {"/": "/ipfs/${appDetails.ipfsLogoHash || ''}"},
-  bannerImage: {"/": "/ipfs/${appDetails.ipfsBgHash || ''}"},
-  description: "${appDetails.appDescription || ''}"
-})`
-  .replace(/ +profileImage: {"\/": "\/ipfs\/"},\n/g, '')
-  .replace(/ +bannerImage: {"\/": "\/ipfs\/"},\n/g, '')
-  .replace(/ +url: "https:\/\/",\n/g, '')
-  .replace(/ +description: ""\n/g, '')
-  .replace(/ +network: "none",\n/g, '')
-
-const didDoc = (appDetails) => {
-  const did = appDetails.appIdentity.did.replace('did:ethr:', '')
-  return `{
-  "@context": "https://w3id.org/did/v1",
-  "id": "did:https:${appDetails.appURL || ''}",
-  "publicKey": [{
-    "id": "did:https:${appDetails.appURL || ''}#owner",
-    "type": "Secp256k1VerificationKey2018",
-    "owner": "did:https:${appDetails.appURL || ''}",
-    "ethereumAddress": "${did}"
-  }],
-  "authentication": [{
-    "type": "Secp256k1SignatureAuthentication2018",
-    "publicKey": "did:https:${appDetails.appURL || ''}#owner"
-  }]
-}`
-  .replace(/ +"id": "did:https:",\n/g, '')
-  .replace(/ +"id": "did:https:#owner",\n/g, '')
-  .replace(/ +"owner": "did:https:",\n/g, '')
-  .replace(/ +"publicKey": "did:https:#owner"\n/g, '')
-}
 
 class AppRegComplete extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      verificationModal: false,
       sendVerificationModal: false,
+      domainVerification: {
+        domainVerified: false,
+        showDomainVerification: false,
+        appURL: null
+      },
+      marketplaceOnboarding: {
+        showMarketplaceOnboarding: false
+      },
+      marketplaceOnboardingStarted: false,
+      marketplaceOnboardingComplete: false,
       claim: null
     }
+    this.getChildState = this.getChildState.bind(this)
   }
   componentDidMount() {
     trackPage('App Configurator', {
       step: 'App Registration Complete',
       value: {
-        name: this.props.appDetails.appName,
-        appURL: this.props.appDetails.appURL
+        name: this.props.appDetails.appName
       }
     })
     this.showPopup()
   }
   showPopup = () => {
     let uportApps = this.props.profile.uportApps || {}
+    const {domainVerification} = this.state;
     const configuration = {
       network: this.props.appEnvironment.network != 'none'
         ? this.props.appEnvironment.network
@@ -108,8 +61,11 @@ class AppRegComplete extends Component {
       bannerImage: this.props.appDetails.ipfsBgHash
         ? '/ipfs/' + this.props.appDetails.ipfsBgHash
         : '',
-      url: this.props.appDetails.appURL,
-      description: this.props.appDetails.appDescription
+      url: this.state.domainVerification.appUrl
+        ? this.state.domainVerification.appUrl
+        : '',
+      description: this.props.appDetails.appDescription,
+      did: this.props.appDetails.appIdentity.did
     }
     Object.keys(configuration).forEach(key => {
       configuration[key] || delete configuration[key]
@@ -119,27 +75,18 @@ class AppRegComplete extends Component {
       configuration
     }
     if (this.props.profile.uportApps) {
-      uportApps.push(claim)
+      if (!domainVerification.domainVerified) {
+        console.log(claim)
+        this.props.setCurrentApp(claim, uportApps.length)
+        uportApps.push(claim)
+      } else {
+        uportApps[(uportApps.length - 1)] = claim
+      }
       claim = {'uport-apps': uportApps}
     } else {
+      this.props.setCurrentApp(claim, 0)
       claim = {'uport-apps': [claim]}
     }
-    // try {
-    //   uPortConnect.sendVerification({
-    //     sub: this.props.profile.did,
-    //     claim
-    //   }, 'ADD-APP', {
-    //     notifications: true
-    //   })
-    //   uPortConnect.onResponse('ADD-APP').then(payload => {
-    //     Object.keys(uportApps).length > 0
-    //       ? this.props.saveApps(uportApps)
-    //       : this.props.saveApps(claim['uport-apps'])
-    //     this.setState({ done: true })
-    //   })
-    // } catch (e) {
-    //   console.log(e)
-    // }
     this.setState({
       claim,
       sendVerificationModal: true
@@ -149,42 +96,11 @@ class AppRegComplete extends Component {
     else
       this.props.saveApps(claim['uport-apps'])
   }
-  handleCopy = (str, id) => () => {
-    copyToClipboard(str);
-    this.track('App Configurator Code Copied', {
-      step: 'App Registration Complete',
-      value: {
-        name: this.props.appDetails.appName,
-        appURL: this.props.appDetails.appURL,
-        content: id
-      }
-    })
-  }
   hideUportVerificationModal = () => {
     this.setState({
       claim: null,
       sendVerificationModal: false
     })
-  }
-  hideVerificationModal = () => {
-    this.track('App Configurator Verification Modal Closed', {
-      step: 'App Registration Complete',
-      value: {
-        name: this.props.appDetails.appName,
-        appURL: this.props.appDetails.appURL
-      }
-    })
-    this.setState({ verificationModal: false })
-  }
-  showVerificationModal = () => {
-    this.track('App Configurator Verification Modal Opened', {
-      step: 'App Registration Complete',
-      value: {
-        name: this.props.appDetails.appName,
-        appURL: this.props.appDetails.appURL
-      }
-    })
-    this.setState({ verificationModal: true })
   }
   track = (name, properties={}) => {
     track(name, {
@@ -192,172 +108,140 @@ class AppRegComplete extends Component {
       ...properties
     })
   }
+  startDomainVerification = (e) => {
+    e.preventDefault()
+    this.setState({domainVerification: {showDomainVerification: true}})
+  }
+  startMarketplaceOnboarding = (e) => {
+    e.preventDefault()
+    this.setState({marketplaceOnboardingStarted: true})
+  }
+  getChildState (childName, childState) {
+    let childStateObject = {}
+    childStateObject[childName] = childState
+    this.setState(childStateObject)
+    if (childName === 'domainVerification') {
+      this.showPopup()
+    }
+  }
   render () {
     const { appDetails, appEnvironment, signingKey, ipfsProfileHash } = this.props
-    const { verificationModal, sendVerificationModal, claim } = this.state;
-    return (<div>
-      <Section className={verificationModal ? 'blurred' : ''}>
-        <Success>
-          <Check src={tick} />
-          <h2>Registration complete!</h2>
-          <p>
-            Congrats! {appDetails.appName} now has an application identity with
-            uPort.  Start building with the resources below, or take a look
-            at our tutorials and docs.
-          </p>
-        </Success>
-        <Body fullWidth={appEnvironment.environment === 'client'}>
-          <Container className={'card-container ' + (appEnvironment.environment ? 'card-container-full' : null)}>
-            <h3>Start Building with Your App Code</h3>
-            <Card>
-              <Card.Content>
-                <Step>
-                  <Step.Number>1</Step.Number>
-                  <Step.Label>Install Libraries</Step.Label>
-                  <Step.Content>
-                    <CodeContainer>
-                      <CopyButton onCopy={appEnvironment.environment === 'server'
-                        ? this.handleCopy(installCodeServer, 'Install Libraries')
-                        : this.handleCopy(installCodeClient, 'Install Libraries')}
-                      >
-                        Copy
-                      </CopyButton>
-                      <Pre>
-                        <Code>
-                          {appEnvironment.environment === 'server'
-                            ? installCodeServer
-                            : installCodeClient}
-                        </Code>
-                      </Pre>
-                    </CodeContainer>
-                  </Step.Content>
-                </Step>
-                <Step>
-                  <Step.Number>2</Step.Number>
-                  <Step.Label>Initalize uPort {appEnvironment.environment === 'server' ? 'Credentials' : 'Connect'}</Step.Label>
-                  <Step.Content>
-                    <CodeContainer>
-                      <CopyButton
-                        onCopy={appEnvironment.environment === 'server'
-                          ? this.handleCopy(
-                              initServerCode(appDetails, appEnvironment, signingKey),
-                              'Initialize uPort Connect'
-                            )
-                          : this.handleCopy(
-                              initClientCode(appDetails, appEnvironment),
-                              'Initialize uPort Connect'
-                            )}
-                      >
-                        Copy
-                      </CopyButton>
-                      <Pre>
-                        <Code data-do-not-track-copy={true}>
-                          {appEnvironment.environment === 'server'
-                            ? initServerCode(appDetails, appEnvironment, signingKey)
-                            : initClientCode(appDetails, appEnvironment)}
-                        </Code>
-                      </Pre>
-                    </CodeContainer>
-                  </Step.Content>
-                </Step>
-                {appEnvironment.environment === 'server'
-                ? <Step>
-                    <Step.Number>3</Step.Number>
-                    <Step.Label>Create a disclosure request</Step.Label>
-                    <Step.Content>
-                      <CodeContainer>
-                        <CopyButton
-                          onCopy={this.handleCopy(
-                                disclosureServerCode(ipfsProfileHash),
-                                'Initialize uPort Connect'
-                              )}
-                        >
-                          Copy
-                        </CopyButton>
-                        <Pre>
-                          <Code data-do-not-track-copy={true}>
-                              {disclosureServerCode(ipfsProfileHash)}
-                          </Code>
-                        </Pre>
-                      </CodeContainer>
-                    </Step.Content>
-                  </Step>
-                : null }
-              </Card.Content>
-              <Card.Footer>
-                <CTALink to='/myapps/detail?tab=code'>View Full App Code</CTALink>
-              </Card.Footer>
-            </Card>
-            {appEnvironment.environment === 'server'
-              ? <Card>
-                {appDetails.appURL
-                  ? <Card.Content>
-                    <h4>Get uPort Verification Badge</h4>
-                    <p>Verify your URL domain in 2 easy steps</p>
-                    <Icon src={cog} />
-                    <UnorderedList>
-                      <li>Make your user feel safe while using your app</li>
-                      <li>Protect your user against phishing </li>
-                      <li>Join the community of verified uPort users</li>
-                    </UnorderedList>
-                  </Card.Content>
-                  : <Card.Content>
-                    <h4>Get uPort Verification Badge</h4>
-                    <Icon src={cog} />
-                    <p>
-                      If you want to build trust and verify your domain,
-                      please re-register and add your project’s url
-                    </p>
-                  </Card.Content>}
-                <Card.Footer>
-                  {!appDetails.appURL || <CTAButton onClick={this.showVerificationModal}>
-                    Learn How to Get the Badge
-                  </CTAButton>}
-                </Card.Footer>
-              </Card>
-            : null}
-          </Container>
-        </Body>
-      </Section>
-      <VerificationModal
-        appDetails={appDetails}
-        show={verificationModal}
-        onClose={this.hideVerificationModal}
-      >
-        <p>
-          To associate your domain with your App Identity just upload the
-          following document to {" "}
-          <strong>
-            {`https://${appDetails.appURL}/.well-known/did.json`}
-          </strong>
-        </p>
-        <CodeContainer>
-          <CopyButton onCopy={this.handleCopy(didDoc(appDetails), 'DID Doc')}>
-            Copy
-          </CopyButton>
-          <Pre>
-            <Code className='language-javascript'>
-              {didDoc(appDetails)}
-            </Code>
-          </Pre>
-        </CodeContainer>
-      </VerificationModal>
-      <SendVerificationModal
-        show={claim && sendVerificationModal}
-        onClose={this.hideUportVerificationModal}
-        claim={claim} />
-    </div>)
+    const { sendVerificationModal, claim, domainVerification, marketplaceOnboardingStarted, marketplaceOnboardingComplete } = this.state;
+
+    if (domainVerification.showDomainVerification) {
+      return (<div>
+        <Section>
+          <VerifyDomain getChildState={this.getChildState} />
+        </Section>
+      </div>)
+    } else if (marketplaceOnboardingStarted) {
+      // Marketplace Onboarding
+      return (<div>
+        <Section>
+          <Onboarding
+            appDetails={appDetails}
+            domainVerification={domainVerification}
+            getChildState={this.getChildState}
+          />
+        </Section>
+      </div>)
+    } else {
+      // Sample Code
+      return (<div>
+        <Section>
+          <Success>
+            <Check src={tick} />
+            {marketplaceOnboardingComplete
+              ? <div>
+                <h2>Congratulations</h2>
+                <p>
+                  {appDetails.appName} has joined uPort Marketplace
+                  Start building with the resources below, or take a look at
+                  our tutorials and docs.
+                </p>
+              </div>
+              : <div>
+                <h2>Registration complete!</h2>
+                <p>
+                  Congrats! {appDetails.appName} now has an application
+                  identity with uPort.  Start building with the resources
+                  below, or take a look at our tutorials and docs.
+                </p>
+              </div>
+            }
+          </Success>
+          <NextSteps>
+            <Content>
+              <label className='nextsteps-grid-header'>Next Steps</label>
+                {!domainVerification.domainVerified
+                  ? <Step>
+                      <Step.Left bg={verificationIcon} />
+                      <Step.Right>
+                          <h2>Get uPort verification badge</h2>
+                          <p>
+                            Verify your App URL domain in 2 easy steps and join
+                            the community of verified uPort users. Make your
+                            users feel safe while using your app. Protect them
+                            against phising.
+                          </p>
+                          <Step.Link
+                            href='#'
+                            className='link'
+                            onClick={this.startDomainVerification}
+                          >
+                            Get Started
+                          </Step.Link>
+                      </Step.Right>
+                    </Step>
+                  : null}
+                {!marketplaceOnboardingComplete
+                  ? <Step>
+                      <Step.Left bg={marketplaceBg} />
+                      <Step.Right>
+                          <h2>Join uPort Marketplace</h2>
+                          <p>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing
+                            elit, set do eiusmod tempor incididunt ut labore
+                            et dolore magna aliqua. Ut enim ad minim veniam.
+                          </p>
+                          <Step.Link
+                            href='#'
+                            className='link'
+                            onClick={this.startMarketplaceOnboarding}
+                          >
+                            Get Started
+                          </Step.Link>
+                      </Step.Right>
+                    </Step>
+                  : null}
+              </Content>
+        </NextSteps>
+        <SampleCode
+            appDetails={appDetails}
+            appEnvironment={appEnvironment}
+            signingKey={signingKey}
+            ipfsProfileHash={ipfsProfileHash}
+          />
+          <SendVerificationModal
+            show={claim && sendVerificationModal}
+            onClose={this.hideUportVerificationModal}
+            claim={claim} />
+        </Section>
+      </div>)
+    }
   }
 }
 
 const Section = styled.section`
   .configuratorWrap & {
     width: 100%;
-    background: #f9f9fa;
+    background: #fff;
+    padding-bottom: 0;
   }
 `
 const Success = styled.header`
   .configuratorWrap ${Section} & {
+    background-color: #fff;
     margin: 0 auto 100px;
     max-width: 650px;
     text-align: center;
@@ -376,60 +260,6 @@ const Check = styled.img`
   margin: 0 auto;
   width: 50px;
 `
-const Body = styled.div`
-  background: #5c50ca;
-  padding: 40px 0;
-  ${medium(`
-    background-image: url(${imageBg});
-    background-size: cover;
-    margin-bottom: 180px;
-    padding: 0;
-  `)}
-
-  .card-container {
-    h3 {
-      color: #fff;
-      margin: 0 0 20px;
-      text-align: center;
-    }
-    ${medium(`
-      ${props => props.fullWidth
-        ? ''
-        : 'display: grid;'
-      }
-      grid-template-columns: 2fr minmax(320px, 1fr);
-      grid-template-rows: auto auto;
-      grid-gap: 1vw 2vw;
-      transform: translateY(130px);
-
-      h3 {
-        grid-area: 1 / 1 / 2 / 3;
-        margin: 0;
-        text-align: left;
-      }
-    `)}
-  }
-`
-const Card = styled.div`
-  background: #fff;
-  box-shadow: 0 0 10px rgba(139, 139, 139, 0.25);
-  display: grid;
-  grid-template-rows: 1fr 64px;
-  padding: 3vw;
-  margin-bottom: 40px;
-  ${medium(`
-    margin: 0;
-  `)}
-  h4, p {
-    text-align: center;
-  }
-  li {
-    margin-bottom: 20px;
-  }
-`
-Card.Content = styled.div``
-Card.Footer = styled.div``
-
 const Icon = styled.img`
   display: block;
   height: 96px;
@@ -448,60 +278,109 @@ const CTAButton = styled.button`
   text-align: center;
   width: 100%;
 `
-const CTALink = styled(Link)`
-  background: linear-gradient(44.17deg, #5c50ca 0%, #7958d8 100%);
-  border-radius: 4px;
-  color: #fff;
-  display: block;
-  font-weight: 700;
-  font-size: 16px;
-  line-height: 24px;
-  padding: 20px;
-  text-align: center;
-  text-decoration: none;
-  width: 100%;
+
+const NextStepsWrapper = styled.div`
+  overflow: hidden;
+  position: relative;
+  background-color: #f9f9fa;
+
+  .nextsteps-grid {
+    display: grid;
+    grid-template-columns: auto;
+    grid-template-rows: auto;
+    grid-gap: 50px;
+    padding-top: 10px;
+    padding-top: 5vh;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 4;
+  }
+  .nextsteps-grid-header {
+    padding: 0 0 0 40px;
+    margin: 0;
+    text-align: left;
+    font-size: 14px;
+    text-transform: uppercase;
+    color: #8986A0;
+  }
+`
+const Content = styled(Container)`
+  position: relative;
+  z-index: 4;
+`
+const NextSteps = styled.div`
+  background-color: #f2f2f2;
+  padding: 60px 20px;
+
+  & > label {
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 24px;
+    text-transform: uppercase;
+  }
+
+  ${Container} {
+    margin: 0 auto;
+    max-width: 790px;
+  }
 `
 const Step = styled.div`
-  display: grid;
-  grid-gap: 20px;
-  grid-template-columns: 35px 1fr;
-  grid-template-rows: auto auto;
-  margin-bottom: 50px;
+  background: #fff;
+  box-shadow: 0 0 10px rgba(139, 139, 139, 0.25);
+  display: flex;
+  margin: 20px auto;
+  & + & {
+    margin-top: 40px;
+  }
 `
-Step.Number = styled.div`
-  background: #62b482;
-  border-radius: 50%;
-  color: #fff;
+Step.Left = styled.div`
+  background: transparent url(${props => props.bg}) left bottom no-repeat;
+  display: none;
+  flex: 3;
+  ${medium('display: block;')}
+`
+Step.Right = styled.div`
+  color: #3F3D4B;
+  flex: 5;
+  padding: 50px;
+  h2 {
+    font-weight: bold;
+    font-size: 22px;
+    line-height: 24px;
+    margin: 0;
+  }
+  p {
+    font-size: 16px;
+    line-height: 26px;
+    margin: 15px 0;
+  }
+`
+Step.Link = styled.a`
+  color: #5C50CA;
+  font-weight: 600;
   font-size: 14px;
-  font-weight: 700;
-  height: 30px;
-  line-height: 30px;
-  text-align: center;
-  width: 30px;
-`
-Step.Label = styled.label`
-  color: #3f3d4b;
-  font-weight: 800;
-  font-size: 16px;
-  line-height: 30px;
-  text-transform: none;
-`
-Step.Content = styled.div`
+  line-height: 18px;
   grid-area: 2 / 1 / 3 / 3;
-  overflow: auto;
+  text-decoration: none;
+  text-transform: uppercase;
+
+  &:after {
+    content: "\\2192";
+    font-size: 16px;
+    margin-left: 5px;
+    vertical-align: middle;
+  }
 `
-const Code = styled.code``
-const Pre = styled.pre`
-  background: #f5f5fa;
-  border: solid 1px #e3e3e4;
-  border-radius: 4px;
-  box-shadow: 0 0 4px 0 inset #e3e3e4;
-  margin: 0;
-  padding: 40px 20px 20px;
+
+const Background = styled.div`
+  bottom: -40px;
+  left: 0;
+  position: absolute;
+  right: 0;
+  z-index: 2;
 `
-const CodeContainer = styled.div`
-  overflow: auto;
-  position: relative;
+const Triangle = styled.svg`
+  fill: #fff;
 `
 
 export default AppRegComplete
