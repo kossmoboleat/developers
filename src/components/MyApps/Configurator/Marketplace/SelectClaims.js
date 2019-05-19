@@ -1,16 +1,12 @@
 import React, { Component } from 'react'
 import gql from 'graphql-tag'
-import { Query, ApolloConsumer,compose, graphql } from 'react-apollo'
+import { Query,compose, graphql } from 'react-apollo'
 import Select from 'react-select'
 import styled from 'styled-components'
 import CancelModal from '../CancelModal'
 import AddClaimModal from './AddClaimModal'
 import Footer from '../Footer'
 import { Container, Grid, Col, Spacer, medium } from '../../../../layouts/grid'
-
-
-let requiredIssuerOptions = [{ value: 'any', label: 'Any Issuer' }]
-
 
 function AddedIssuedClaims (props) {
   const { issuedClaims, issuedClaimTypeOptions } = props

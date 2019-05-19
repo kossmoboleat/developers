@@ -29,10 +29,10 @@ class AppRegComplete extends Component {
         appURL: null
       },
       marketplaceOnboarding: {
-        showMarketplaceOnboarding: false
+        showBanner: true,
+        started: false,
+        complete: false
       },
-      marketplaceOnboardingStarted: false,
-      marketplaceOnboardingComplete: false,
       claim: null
     }
     this.getChildState = this.getChildState.bind(this)
@@ -114,7 +114,7 @@ class AppRegComplete extends Component {
   }
   startMarketplaceOnboarding = (e) => {
     e.preventDefault()
-    this.setState({marketplaceOnboardingStarted: true})
+    this.setState({marketplaceOnboarding: {started: true}})
   }
   getChildState (childName, childState) {
     let childStateObject = {}
@@ -126,16 +126,14 @@ class AppRegComplete extends Component {
   }
   render () {
     const { appDetails, appEnvironment, signingKey, ipfsProfileHash } = this.props
-    const { sendVerificationModal, claim, domainVerification, marketplaceOnboardingStarted, marketplaceOnboardingComplete } = this.state;
-
+    const { sendVerificationModal, claim, domainVerification, marketplaceOnboarding } = this.state;
     if (domainVerification.showDomainVerification) {
       return (<div>
         <Section>
           <VerifyDomain getChildState={this.getChildState} />
         </Section>
       </div>)
-    } else if (marketplaceOnboardingStarted) {
-      // Marketplace Onboarding
+    } else if (marketplaceOnboarding.started) {
       return (<div>
         <Section>
           <Onboarding
@@ -146,12 +144,11 @@ class AppRegComplete extends Component {
         </Section>
       </div>)
     } else {
-      // Sample Code
       return (<div>
         <Section>
           <Success>
             <Check src={tick} />
-            {marketplaceOnboardingComplete
+            {marketplaceOnboarding.complete
               ? <div>
                 <h2>Congratulations</h2>
                 <p>
@@ -170,52 +167,54 @@ class AppRegComplete extends Component {
               </div>
             }
           </Success>
-          <NextSteps>
-            <Content>
-              <label className='nextsteps-grid-header'>Next Steps</label>
-                {!domainVerification.domainVerified
-                  ? <Step>
-                      <Step.Left bg={verificationIcon} />
-                      <Step.Right>
-                          <h2>Get uPort verification badge</h2>
-                          <p>
-                            Verify your App URL domain in 2 easy steps and join
-                            the community of verified uPort users. Make your
-                            users feel safe while using your app. Protect them
-                            against phising.
-                          </p>
-                          <Step.Link
-                            href='#'
-                            className='link'
-                            onClick={this.startDomainVerification}
-                          >
-                            Get Started
-                          </Step.Link>
-                      </Step.Right>
-                    </Step>
-                  : null}
-                {!marketplaceOnboardingComplete
-                  ? <Step>
-                      <Step.Left bg={marketplaceBg} />
-                      <Step.Right>
-                          <h2>Join uPort Marketplace</h2>
-                          <p>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                            elit, set do eiusmod tempor incididunt ut labore
-                            et dolore magna aliqua. Ut enim ad minim veniam.
-                          </p>
-                          <Step.Link
-                            href='#'
-                            className='link'
-                            onClick={this.startMarketplaceOnboarding}
-                          >
-                            Get Started
-                          </Step.Link>
-                      </Step.Right>
-                    </Step>
-                  : null}
-              </Content>
-        </NextSteps>
+          {!marketplaceOnboarding.complete
+            ? <NextSteps>
+                <Content>
+                  <label className='nextsteps-grid-header'>Next Steps</label>
+                  {!domainVerification.domainVerified
+                    ? <Step>
+                        <Step.Left bg={verificationIcon} />
+                        <Step.Right>
+                            <h2>Get uPort verification badge</h2>
+                            <p>
+                              Verify your App URL domain in 2 easy steps and join
+                              the community of verified uPort users. Make your
+                              users feel safe while using your app. Protect them
+                              against phising.
+                            </p>
+                            <Step.Link
+                              href='#'
+                              className='link'
+                              onClick={this.startDomainVerification}
+                            >
+                              Get Started
+                            </Step.Link>
+                        </Step.Right>
+                      </Step>
+                    : null
+                  }
+                  <Step>
+                    <Step.Left bg={marketplaceBg} />
+                    <Step.Right>
+                        <h2>Join uPort Marketplace</h2>
+                        <p>
+                          Lorem ipsum dolor sit amet, consectetur adipiscing
+                          elit, set do eiusmod tempor incididunt ut labore
+                          et dolore magna aliqua. Ut enim ad minim veniam.
+                        </p>
+                        <Step.Link
+                          href='#'
+                          className='link'
+                          onClick={this.startMarketplaceOnboarding}
+                        >
+                          Get Started
+                        </Step.Link>
+                    </Step.Right>
+                  </Step>
+                </Content>
+              </NextSteps>
+            : null
+          }
         <SampleCode
             appDetails={appDetails}
             appEnvironment={appEnvironment}
