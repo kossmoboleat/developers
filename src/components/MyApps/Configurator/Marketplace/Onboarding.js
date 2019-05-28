@@ -29,8 +29,8 @@ class Onboarding extends React.Component {
       selectClaims: {
         requiredClaims: [],
         issuedClaims: [],
-        requiredClaimTypeOptions: [{value: 'firstName', label: 'First Name'}, { value: 'lastName', label: 'Last Name' }, {value: 'dateOfBirth', label: 'Date of Birth'}, {value: 'emailAddress', label: 'Email Address'}, {value: 'phoneNumber', label: 'Phone Number'}, {value: 'address', label: 'Address'}, {value: 'addClaim', label: '+ Add Claim'}],
-        issuedClaimTypeOptions: [{value: 'firstName', label: 'First Name'}, {value: 'lastName', label: 'Last Name'}, {value: 'dateOfBirth', label: 'Date of Birth'}, {value: 'emailAddress', label: 'Email Address'}, {value: 'phoneNumber', label: 'Phone Number'}, {value: 'address', label: 'Address'}, {value: 'addClaim', label: '+ Add Claim'}]
+        requiredClaimTypeOptions: [{value: 'firstName', label: 'First Name'}, { value: 'lastName', label: 'Last Name' }, {value: 'dateOfBirth', label: 'Date of Birth'}, {value: 'emailAddress', label: 'Email Address'}, {value: 'phoneNumber', label: 'Phone Number'}, {value: 'address', label: 'Address'}, {value: 'addClaim', label: '+ add other'}],
+        issuedClaimTypeOptions: [{value: 'firstName', label: 'First Name'}, {value: 'lastName', label: 'Last Name'}, {value: 'dateOfBirth', label: 'Date of Birth'}, {value: 'emailAddress', label: 'Email Address'}, {value: 'phoneNumber', label: 'Phone Number'}, {value: 'address', label: 'Address'}, {value: 'addClaim', label: '+ add other'}]
       },
       review: {
         complete: false

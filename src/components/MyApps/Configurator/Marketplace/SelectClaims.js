@@ -38,11 +38,11 @@ function AddedRequiredClaims (props) {
     <Grid key={index}>
       <Col span={6}>
         <label htmlFor='issuedBy'>Issued By</label>
-        <Query query={GET_ENTITIES}>
+        <Query query={GET_ISSUER_CREDENTIALS}>
           {({ loading, error, data }) => {
             if (loading) return <div>Loading...</div>;
             if (error) return <div>Error :(</div>;
-            let entityOptions = data.entities.nodes
+            let issuerCredentialOptions = data.issuerCredentials.nodes
             .filter(function(node) {
               if (node.issuerCredentials.nodes.length > 0) {return true}
               else {return false}
@@ -57,7 +57,7 @@ function AddedRequiredClaims (props) {
                 classNamePrefix='networkDropdown'
                 value={requiredClaim.issuer}
                 onChange={(e) => props.handleAddedRequiredClaimTypeUpdate(index, e)}
-                options={entityOptions}
+                options={issuerCredentialOptions}
                 isSearchable={false}
                 isDisabled={true}
                 blurInputOnSelect
@@ -78,8 +78,8 @@ function AddedRequiredClaims (props) {
       </Col>
       <Col span={6}>
         <label htmlFor='claimType'>Claim Type</label>
-        {requiredClaim.claimType ? 
-          <Query query={GET_ISSUER_CREDENTIALS_BY_ENTITY} variables={{ rowId: requiredClaim.claimType.value}}>
+        {requiredClaim.issuer ? 
+          <Query query={GET_ENTITY_BY_ID} variables={{ rowId: requiredClaim.issuer.value}}>
             {({ loading, error, data }) => {
               if (loading) return <div>Loading...</div>;
               if (error) return <div>Error :(</div>;
@@ -147,11 +147,7 @@ class SelectClaims extends Component {
     this.setState({ addClaimModal: false, claimField: null })
   }
   handleRequiredClaimTypeChange (selectedOption) {
-    if (selectedOption.value === 'addClaim') {
-      this.showAddClaimModal('requiredClaimType', 0)
-    } else {
-      this.setState({requiredClaimType: selectedOption})
-    }
+    this.setState({requiredClaimType: selectedOption})
   }
   handleIssuedClaimTypeChange (selectedOption) {
     if (selectedOption.value === 'addClaim') {
@@ -281,6 +277,7 @@ class SelectClaims extends Component {
                                 classNamePrefix='networkDropdown'
                                 value={this.state.issuedClaimType}
                                 onChange={this.handleIssuedClaimTypeChange}
+                                styles={customDropdownStyles}
                                 options={issuedClaimTypeOptions}
                                 isSearchable={false}
                                 blurInputOnSelect
@@ -302,27 +299,23 @@ class SelectClaims extends Component {
                           />
                           <Grid>
                             <Col span={6}>
-                              <label htmlFor='issuedBy'>Issued By</label>
-                              <Query query={GET_ENTITIES}>
+                              <label htmlFor='claimType'>Claim Type</label>
+                              <Query query={GET_ISSUER_CREDENTIALS}>
                                 {({ loading, error, data }) => {
                                   if (loading) return <div>Loading...</div>;
                                   if (error) return <div>Error :(</div>;
-                                  let entityOptions = data.entities.nodes
-                                  .filter(function(node) {
-                                    if (node.issuerCredentials.nodes.length > 0) {return true}
-                                    else {return false}
-                                  })
+                                  let issuerCredentialOptions = data.issuerCredentials.nodes
                                   .map(function (node){
-                                    return {value: node.rowId, label: node.name}
+                                    return {value: node.rowId, label: node.claimType}
                                   })
                                   return (
                                     <Select
                                       id='issuedBy'
                                       className='networkDropdown'
                                       classNamePrefix='networkDropdown'
-                                      value={this.state.requiredIssuer}
-                                      onChange={this.handleRequiredIssuerChange}
-                                      options={entityOptions}
+                                      value={this.state.requiredClaimType}
+                                      onChange={this.handleRequiredClaimTypeChange}
+                                      options={issuerCredentialOptions}
                                       isSearchable={false}
                                       blurInputOnSelect
                                     />
@@ -342,21 +335,21 @@ class SelectClaims extends Component {
                               </Checkbox>
                             </Col>
                             <Col span={6}>
-                              <label htmlFor='claimType'>Claim Type</label>
+                              <label htmlFor='issuedBy'>Issued By</label>
                               {this.state.requiredIssuer ? 
-                              <Query query={GET_ISSUER_CREDENTIALS_BY_ENTITY} variables={{ rowId: this.state.requiredIssuer.value}}>
+                              <Query query={GET_ENTITY_BY_ID} variables={{ rowId: this.state.requiredIssuer.label}}>
                                 {({ loading, error, data }) => {
                                   if (loading) return <div>Loading...</div>;
                                   if (error) return <div>Error :(</div>;
-                                  let issuerCredentials = data.entity.issuerCredentials.nodes.map(function (node){return {value: node.rowId, label: node.claimType}})
+                                  let entityOptions = data.entity.nodes.map(function (node){return {value: node.rowId, label: node.name}})
                                   return (
                                     <Select
                                       id='claimType'
                                       className='networkDropdown'
                                       classNamePrefix='networkDropdown'
-                                      value={this.state.requiredClaimType}
-                                      onChange={this.handleRequiredClaimTypeChange}
-                                      options={issuerCredentials}
+                                      value={this.state.requiredIssuer}
+                                      onChange={this.handleRequiredIssuerChange}
+                                      options={entityOptions}
                                       isSearchable={false}
                                       isDisabled={false}
                                       blurInputOnSelect
@@ -447,6 +440,27 @@ const Checkbox = styled.div`
   }
 `
 
+const customDropdownStyles = {
+  option: (provided, {data}) => {
+    return {
+      ...provided, 
+      padding: '15px',
+      color: (data.value === 'addClaim' 
+        ? '#5C50CA' 
+        : null
+      ),
+      borderTop: (data.value === 'addClaim' 
+        ? '0.3px solid #8986A0' 
+        : null
+      ),
+      marginBottom: (data.value === 'addClaim' 
+        ? '-3px' 
+        : null
+      ),
+    }
+  }
+}
+
 const AddClaim = styled.button`
   background-color: #fff;
   border: solid 2px #5c50ca;
@@ -465,27 +479,23 @@ const AddClaim = styled.button`
 `
 
 // GraphQL Queries
-const GET_ENTITIES = gql` 
+const GET_ISSUER_CREDENTIALS = gql` 
   query {
-    entities {
+    issuerCredentials {
       nodes {
         id
         rowId
-        name
-        issuerCredentials {
-          nodes {
-            rowId
-            claimType
-          }
-        }
+        claimType
+        entityId
       }
     }
   }
 `
 
-const GET_ISSUER_CREDENTIALS_BY_ENTITY = gql` 
+const GET_ENTITY_BY_ID = gql` 
   query($rowId: Int!) {
     entity(rowId: $rowId) {
+      id
       name
       issuerCredentials {
         nodes {
