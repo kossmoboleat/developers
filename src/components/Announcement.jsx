@@ -2,6 +2,8 @@ import React, {Component} from 'react'
 import AutoLinkText from 'react-autolink-text2'
 import styled from 'styled-components'
 
+import { small } from '../layouts/grid';
+
 class Announcement extends Component {
   constructor() {
     super()
@@ -34,7 +36,7 @@ class Announcement extends Component {
     }, 200)
   }
   render () {
-    const { children, data={}, type } = this.props
+    const { data={}, type } = this.props
     const { visible, expanded } = this.state
     const { announcement } = data;
     const messages = []
@@ -84,19 +86,20 @@ const Container = styled.aside`
   border-top: none;
   display: grid;
   grid-template-columns: 1fr 50px;
-  margin: -85px 0 30px;
+  margin: 0 0 30px;
   overflow: hidden;
   text-align: center;
   transition: margin-top 0.2s, visibility 0.5s;
   visibility: hidden;
   ${props => props._height
     ? `
-      margin-top: -${props._height + 25}px;
+      margin-top: -${props._height + 90}px;
       position: static;
     ` : ''}
   ${props => props.expanded
     ? `
-      margin-top: -25px;
+      margin-top: 30px;
+      ${small("margin-top: 0;")}
       visibility: visible;
     `
     : ''}

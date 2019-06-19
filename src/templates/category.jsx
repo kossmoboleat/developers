@@ -15,7 +15,7 @@ import TableOfContents from '../components/Layout/TableOfContents'
 import SecondaryTitle from '../components/Layout/html/SecondaryTitle'
 import OrderedList from '../components/Layout/html/OrderedList'
 import UnorderedList from '../components/Layout/html/UnorderedList'
-import CtaButton from '../components/CtaButton'
+import EditButton from '../components/EditButton'
 import Announcement from '../components/Announcement'
 import getHeadings from '../utilities/getHeadings'
 import { Container, Grid, Col, Spacer, small } from '../layouts/grid'
@@ -76,8 +76,8 @@ class CategoryTemplate extends React.Component {
               types={this.props.navTypes}
             />
           </HeaderContainer>
+          <Announcement data={this.props.data} />
           <BodyContainer ref={ref => this.contentWindow=ref}>
-            <Announcement data={this.props.data} />
             <Container>
               <Grid>
                 <ToCContainer>
@@ -89,10 +89,7 @@ class CategoryTemplate extends React.Component {
                   />
                 </ToCContainer>
                 <Spacer span={1} />
-                <Col span={7}>
-                  <CtaButton to={`${post.source}`}>
-                    Edit
-                  </CtaButton>
+                <Col span={6}>
                   <Grid style={{width: "100%"}}>
                     <Col span={12} style={{width: "100%"}}>
                     <div className={`docSearch-content`}>
@@ -100,6 +97,9 @@ class CategoryTemplate extends React.Component {
                     </div>
                     </Col>
                   </Grid>
+                </Col>
+                <Col span={2}>
+                  <EditButton to={`${post.source}`} />
                 </Col>
                 <Spacer span={4} />
                 <Col span={8}>
@@ -134,8 +134,9 @@ const BodyContainer = styled.div`
   padding-right: 0;
   width: 100%;
 
-  & > h1 {
-    color: ${props => props.theme.accentDark};
+  h1 {
+    // color: ${props => props.theme.accentDark};
+    margin-top: 60px;
   }
   h2 {
     margin-top: 60px;
@@ -146,7 +147,7 @@ const BodyContainer = styled.div`
 `
 const HeaderContainer = styled.div`
   background: ${props => props.theme.brand};
-  width: 100vw;
+  width: 100%;
   .Grid {
     width: 90vw;
     margin: 0 auto;

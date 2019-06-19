@@ -30,85 +30,74 @@ class Index extends React.Component {
   }
   render () {
     const postEdges = this.props.data.allMarkdownRemark.edges
-    const messages = []
-
-    /* If there is an announcement, broadcast it at the top of each page */
-    if (this.props.data.announcement) {
-      this.props.data.announcement.edges.forEach(announcement => {
-        messages.push(
-          <h4 key={announcement.node.frontmatter.announcement}>
-            <AutoLinkText text={`${announcement.node.frontmatter.announcement}`}
-              linkProps={{target: '_blank'}} />
-          </h4>
-        )
-      })
-    }
     return (<Layout location={this.props.location}>
       <div className='index-container'>
         <Helmet title={config.siteTitle} />
         <SEO postEdges={postEdges} />
         <main>
-          <IndexHeadContainer>
-            <SiteHeader
-              activeSection={''}
-              location={this.props.location}
-              types={this.props.data.navTypes} />
-            <Hero className={`home-hero`}>
-              <Announcement>{messages}</Announcement>
-              <Container className='hero-wrapper'>
-                <Grid>
-                  <Col span={7} large>
-                    <h1 className='hero-title'>Build User-Centric Ethereum Apps</h1>
-                    <ValueProps>
-                      <h2>Give your users the sovereignty to manage details about their digital-selves.</h2>
-                    </ValueProps>
-                  </Col>
-                  <Col span={5} large>
-                    <div className={`hero-img`}>
-                      <img src={heroImg} />
+          <HeaderGrid>
+            <IndexHeadContainer>
+              <SiteHeader
+                activeSection={''}
+                location={this.props.location}
+                types={this.props.data.navTypes} />
+            </IndexHeadContainer>
+            <Announcement data={this.props.data} />
+          </HeaderGrid>
+          <Hero className={`home-hero`}>
+            <Container className='hero-wrapper'>
+              <Grid>
+                <Col span={7} large>
+                  <h1 className='hero-title'>Build User-Centric Ethereum Apps</h1>
+                  <ValueProps>
+                    <h2>Give your users the sovereignty to manage details about their digital-selves.</h2>
+                  </ValueProps>
+                </Col>
+                <Col span={5} large>
+                  <div className={`hero-img`}>
+                    <img src={heroImg} />
+                  </div>
+                </Col>
+                <Col span={6}>
+                  <div className='hero-feature'>
+                    <div className='hero-feature-content'>
+                      <h2>Connect Users to Your web3 dApp</h2>
+                      <p>Add full support for uPort by adding a single line of code to your web3 dApp.</p>
+                      <UnorderedList>
+                        <li>Onboard new users within minutes</li>
+                        <li>Instantly create a privacy-preserving Ethereum account</li>
+                        <li>Build for both desktop and mobile browsers</li>
+                      </UnorderedList>
                     </div>
-                  </Col>
-                  <Col span={6}>
-                    <div className='hero-feature'>
-                      <div className='hero-feature-content'>
-                        <h2>Connect Users to Your web3 dApp</h2>
-                        <p>Add full support for uPort by adding a single line of code to your web3 dApp.</p>
-                        <UnorderedList>
-                          <li>Onboard new users within minutes</li>
-                          <li>Instantly create a privacy-preserving Ethereum account</li>
-                          <li>Build for both desktop and mobile browsers</li>
-                        </UnorderedList>
-                      </div>
-                      <Link className='home-hero-button'
-                        to='/guides/gettingstarted'
-                        onClick={this.track('Connect With Users Clicked')}
-                      >
-                        Connect With Your Users
-                      </Link>
+                    <Link className='home-hero-button'
+                      to='/guides/gettingstarted'
+                      onClick={this.track('Connect With Users Clicked')}
+                    >
+                      Connect With Your Users
+                    </Link>
+                  </div>
+                </Col>
+                <Col span={6} >
+                  <div className='hero-feature'>
+                    <div className='hero-feature-content'>
+                      <h2>Issue & Request Verified Credentials</h2>
+                      <p>Help your users build their digital identity by issuing Verified Credentials about them or the things they do in your app.</p>
+                      <UnorderedList>
+                        <li>Request Ethereum transaction signing with web3</li>
+                        <li>Issue and Request Verified Credentials about your users</li>
+                      </UnorderedList>
                     </div>
-                  </Col>
-                  <Col span={6} >
-                    <div className='hero-feature'>
-                      <div className='hero-feature-content'>
-                        <h2>Issue & Request Verified Credentials</h2>
-                        <p>Help your users build their digital identity by issuing Verified Credentials about them or the things they do in your app.</p>
-                        <UnorderedList>
-                          <li>Request Ethereum transaction signing with web3</li>
-                          <li>Issue and Request Verified Credentials about your users</li>
-                        </UnorderedList>
-                      </div>
-                      <Link to='/uport-credentials/index'
-                        className='home-hero-button'
-                        onClick={this.track('Issue Credentials Clicked')}
-                      >
-                        Issue Verified Credentials
-                      </Link>
-                    </div>
-                  </Col>
-                </Grid>
-              </Container>
-            </Hero>
-          </IndexHeadContainer>
+                    <Link to='/uport-credentials/index'
+                      className='home-hero-button'
+                      onClick={this.track('Issue Credentials Clicked')}
+                    >
+                      Issue Verified Credentials
+                    </Link>
+                  </div>
+                </Col>
+              </Grid>
+            </Container>
+          </Hero>
           <BodyContainer className={`body-container`}>
             <Solutions />
             <BuildingBlocks />
@@ -129,10 +118,27 @@ const AnnouncementContainer = styled.div`
   color: #cc0066;
   padding: 0 10px;
 `
+const HeaderGrid = styled.div`
+  display: grid;
+  grid-template-rows: 60px 1fr;
+  aside {
+    transform: translateY(-30px);
+  }
+`
 const IndexHeadContainer = styled.div`
   background: ${props => props.theme.brand};
 `
+const BodyGrid = styled.div`
+  height: 100vh;
+  display: grid;
+  grid-template-rows: 60px 1fr;
 
+  ${small(`
+    display: flex;
+    flex-direction: column;
+    height: inherit;
+  `)}
+`
 const ValueProps = styled.div`
   h2 {
      color: #8986a0;
