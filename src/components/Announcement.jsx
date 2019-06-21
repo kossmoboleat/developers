@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import AutoLinkText from 'react-autolink-text2'
 import styled from 'styled-components'
 
-import { small } from '../layouts/grid';
+import { medium } from '../layouts/grid';
 
 class Announcement extends Component {
   constructor() {
@@ -80,30 +80,35 @@ const theme = {
 }
 
 const Container = styled.aside`
-  align-self: center;
-  border: none;
-  border-radius: 0 0 4px 4px;
-  border-top: none;
+  align-self: start;
   display: grid;
   grid-template-columns: 1fr 50px;
-  margin: 0 0 30px;
+  margin-top: -60px;
   overflow: hidden;
+  position: static;
   text-align: center;
   transition: margin-top 0.2s, visibility 0.5s;
   visibility: hidden;
-  ${props => props._height
-    ? `
-      margin-top: -${props._height + 90}px;
-      position: static;
-    ` : ''}
+  width: 100vw;
+  z-index: 1;
+
   ${props => props.expanded
     ? `
-      margin-top: 30px;
-      ${small("margin-top: 0;")}
+      margin-top: 0;
       visibility: visible;
     `
     : ''}
+  ${props => props._height
+    ? `
+      ${medium(`
+        margin-bottom: ${props._height}px;
+      `)}
+    ` : medium("margin-bottom: 60px;")}
   ${props => theme[props.type] || theme.positive}
+
+  h3 {
+    padding: 0 10px;
+  }
 `
 
 const Dismiss = styled.button`

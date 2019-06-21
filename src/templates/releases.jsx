@@ -136,6 +136,7 @@ const BodyContainer = styled.div`
 const HeaderContainer = styled.div`
   background: '${props => props.theme.brand}';
   width: 100vw;
+  z-index: 2;
   .Grid {
     width: 90vw;
     margin: 0 auto;
@@ -145,10 +146,6 @@ const HeaderContainer = styled.div`
 const ToCContainer = styled.div`
   grid-area: 1 / 1 / 2 / 4;
   ${small('display: none;')}
-`
-
-const IndexHeadContainer = styled.div`
-  background: ${props => props.theme.brand};
 `
 
 const FooterContainer = styled.footer`
