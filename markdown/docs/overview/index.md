@@ -4,7 +4,7 @@ index: 0
 category: "about"
 type: "overview"
 source: "https://github.com/uport-project/uport-project.github.io/blob/develop/markdown/docs/overview/overview.md"
-announcement: "Announcing EIP-712 support! See our mobile and library release notes https://developer.uport.me/releases for details."
+announcement: "Announcing support to migrate old uport identities to new ethereum mainnet identities, see our Release Notes https://developer.uport.me/releases for more details!"
 announcementType: "positive"
 ---
 
