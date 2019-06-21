@@ -148,6 +148,7 @@ const BodyContainer = styled.div`
 const HeaderContainer = styled.div`
   background: ${props => props.theme.brand};
   width: 100%;
+  z-index: 2;
   .Grid {
     width: 90vw;
     margin: 0 auto;

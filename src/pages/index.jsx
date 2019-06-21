@@ -36,12 +36,12 @@ class Index extends React.Component {
         <SEO postEdges={postEdges} />
         <main>
           <HeaderGrid>
-            <IndexHeadContainer>
+            <HeaderContainer>
               <SiteHeader
                 activeSection={''}
                 location={this.props.location}
                 types={this.props.data.navTypes} />
-            </IndexHeadContainer>
+            </HeaderContainer>
             <Announcement data={this.props.data} />
           </HeaderGrid>
           <Hero className={`home-hero`}>
@@ -122,11 +122,12 @@ const HeaderGrid = styled.div`
   display: grid;
   grid-template-rows: 60px 1fr;
   aside {
-    transform: translateY(-30px);
+    margin-bottom: 0;
   }
 `
-const IndexHeadContainer = styled.div`
+const HeaderContainer = styled.div`
   background: ${props => props.theme.brand};
+  z-index: 2;
 `
 const BodyGrid = styled.div`
   height: 100vh;
